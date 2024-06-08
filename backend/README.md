@@ -16,3 +16,17 @@ ACCESS_TOKEN_TTL=15m
 REFRESH_TOKEN_TTL=30d
 LOG_LEVEL=debug
 ```
+
+## Features
+
+- [x] JWT Auth
+    - [x] register
+    - [x] login
+    - [x] refresh
+    - [x] logout
+- [x] User
+    - [x] Update User
+    - [x] Get User Profile
+- [ ] Lobby and Game
+    - [ ] Create Lobby
+    - [ ] Join Lobby
