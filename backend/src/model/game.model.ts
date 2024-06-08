@@ -17,5 +17,3 @@ export type Game = {
     moves: Array<Move>,
     winner?: string, // objectid
 }
-
-
