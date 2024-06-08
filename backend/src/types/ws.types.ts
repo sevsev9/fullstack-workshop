@@ -11,14 +11,14 @@ export type WSPlayerInfo = {
 export type WSGame = {
     game_id: string;
     player_x: WSPlayerInfo;
-    player_y: WSPlayerInfo;
+    player_o: WSPlayerInfo;
     moves: Array<Move>;
 
     // the player that is currently playing - next move swaps the two letters
     curr: "x" | "o";
 
     // the field that is currently being played - chosen randomly at the start
-    active_field: [number, number];
+    active_field: number;
 };
 
 export type WSGameFinishedEvent = {
