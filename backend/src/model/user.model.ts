@@ -15,6 +15,19 @@ export type User = {
     password?: string;
 
     role: ROLE;
+
+    /**
+     * Game statistics
+     * - wins
+     * - losses
+     * - draws
+     * - games played
+     * - games abandoned
+     * - time played (in game)
+     * - time in lobby
+     * - averate time per game
+     * - average time per move
+     */
 }
 
 export type UserDocument = User & mongoose.Document<string>;
