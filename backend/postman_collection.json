@@ -1,0 +1,508 @@
+{
+	"info": {
+		"_postman_id": "e78f1d11-d624-43d8-95c7-507220d591c1",
+		"name": "htlw-workshop-s24",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "10540412"
+	},
+	"item": [
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "register",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const newEmail = pm.variables.replaceIn(\"{{$randomExampleEmail}}\");",
+									"const newUsername = pm.variables.replaceIn(\"{{$randomFullName}}\");",
+									"const newPassword = pm.variables.replaceIn(\"{{$randomPassword}}\");",
+									"",
+									"pm.environment.set(\"newEmail\", newEmail);",
+									"pm.environment.set(\"newUsername\", newUsername);",
+									"pm.environment.set(\"newPassword\", newPassword);",
+									"",
+									"console.log(newEmail, newUsername, newPassword);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"",
+									"",
+									"if (pm.response.code === 201) {",
+									"    pm.collectionVariables.set('email', pm.environment.get('newEmail'));",
+									"    pm.collectionVariables.set('username', pm.environment.get('newUsername'));",
+									"    pm.collectionVariables.set('password', pm.environment.get('newPassword'));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"{{newUsername}}\",\n    \"email\": \"{{newEmail}}\",\n    \"password\": \"{{newPassword}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/auth/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response_body = pm.response.json();",
+									"",
+									"pm.test(\"response body contains access and refresh token\", () => {",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(response_body.access_token).to.exist;",
+									"    pm.expect(response_body.refresh_token).to.exist;",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.collectionVariables.set(\"access_token\", response_body.access_token);",
+									"    pm.collectionVariables.set(\"refresh_token\", response_body.refresh_token);",
+									"    console.log(\"Set tokens in collection.\");",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"{{password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Logout Successful\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]); ",
+									"});",
+									"",
+									"",
+									"if (pm.response.code === 200 || pm.response.code === 204) {",
+									"    pm.collectionVariables.set('access_token', '');",
+									"    pm.collectionVariables.set('refresh_token', '');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/auth/logout",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "refresh access token",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response_body = pm.response.json();",
+									"",
+									"    pm.collectionVariables.set('access_token', response_body.access_token);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh_token\": \"{{refresh_token}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/auth/refresh",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "general",
+			"item": [
+				{
+					"name": "healthcheck",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/healthcheck",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"healthcheck"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "user",
+			"item": [
+				{
+					"name": "user profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/user/profile",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"user",
+								"profile"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "profile-request-example",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/user/profile",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"user",
+										"profile"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "132"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"84-oR+a88yYApxzxe+wYjFXvcrUvbs\""
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 22 May 2024 13:21:33 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"email\": \"example@email.com\",\n    \"username\": \"sevsev9\",\n    \"role\": \"user\",\n    \"id\": \"someobjectid\"\n}"
+						}
+					]
+				},
+				{
+					"name": "update user profile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const { updates } = pm.response.json();",
+									"",
+									"    if (updates.username) {",
+									"        pm.collectionVariables.set(\"username\", updates.username);",
+									"        console.log(\"Updated username: \", pm.collectionVariables.get(\"username\"));",
+									"    }",
+									"",
+									"    if (updates.email) {",
+									"        pm.collectionVariables.set(\"email\", updates.email);",
+									"        console.log(\"Updated email: \", pm.collectionVariables.get(\"email\"));",
+									"    }",
+									"",
+									"    if (updates.password) {",
+									"        pm.collectionVariables.set(\"password\", pm.environment.get(\"newPassword\"));",
+									"        console.log(\"Updated password: \", pm.collectionVariables.get(\"password\"));",
+									"    }",
+									"}",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const newEmail = pm.variables.replaceIn(\"{{$randomExampleEmail}}\");",
+									"const newUsername = pm.variables.replaceIn(\"{{$randomFullName}}\");",
+									"const newPassword = pm.variables.replaceIn(\"{{$randomPassword}}\");",
+									"",
+									"pm.environment.set(\"newEmail\", newEmail);",
+									"pm.environment.set(\"newUsername\", newUsername);",
+									"pm.environment.set(\"newPassword\", newPassword);",
+									"",
+									"console.log(newEmail, newUsername, newPassword);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"password\": \"{{newPassword}}\" \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/user/profile",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"user",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "username",
+			"value": "sevsev9",
+			"type": "string"
+		},
+		{
+			"key": "email",
+			"value": "example@email.com",
+			"type": "string"
+		},
+		{
+			"key": "password",
+			"value": "Testing_1234!",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": ""
+		},
+		{
+			"key": "refresh_token",
+			"value": ""
+		},
+		{
+			"key": "entry_id",
+			"value": ""
+		}
+	]
+}
