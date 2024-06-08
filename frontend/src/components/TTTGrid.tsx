@@ -1,5 +1,6 @@
 import { CircleIcon, XIcon } from "lucide-react";
 import { useSSTContext } from "@/context/SSTContext";
+import clsx from "clsx";
 
 export default function TTTGrid({
   grid,
@@ -8,8 +9,16 @@ export default function TTTGrid({
   grid: string[];
   gridIndex: number;
 }) {
+  const { game } = useSSTContext();
+  const isActive = game?.active_field === gridIndex;
+
   return (
-    <div className="grid grid-cols-3 gap-1">
+    <div
+      className={clsx(
+        "grid grid-cols-3 gap-1 p-2 rounded-lg",
+        isActive && "bg-indigo-200",
+      )}
+    >
       {grid.map((_, i) => (
         <TTTCell key={i} cellIndex={i} gridIndex={gridIndex} />
       ))}
@@ -24,14 +33,18 @@ function TTTCell({
   cellIndex: number;
   gridIndex: number;
 }) {
-  const { onCellClick } = useSSTContext();
+  const { onCellClick, game } = useSSTContext();
+
+  const isActive = game?.moves.find(
+    ({ position: [x, y] }) => x === gridIndex && y === cellIndex,
+  );
 
   return (
     <span
       onClick={() => onCellClick([gridIndex, cellIndex])}
       className="cursor-pointer border aspect-square rounded flex items-center justify-center border-black hover:bg-secondary"
     >
-      <TTTPlacementDisplay row={""} />
+      {isActive && <TTTPlacementDisplay row={"x"} />}
     </span>
   );
 }
