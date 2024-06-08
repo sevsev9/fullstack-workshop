@@ -15,23 +15,23 @@ export type User = {
     password?: string;
 
     role: ROLE;
-
-    createdAt?: Date;
-    updatedAt?: Date;
 }
 
-export type UserDocument = User & mongoose.Document;
+export type UserDocument = User & mongoose.Document<string>;
 
 export const UserSchema = new mongoose.Schema<UserDocument>({
     username: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        trim: true
     },
     email: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        trim: true,
+        lowercase: true
     },
     password: {
         type: String,
@@ -43,11 +43,9 @@ export const UserSchema = new mongoose.Schema<UserDocument>({
         required: true
     }
 }, {
-    timestamps: true,
-    toJSON: {
-        transform: function (doc, ret) {
-            delete ret.password;
-            delete ret.__v;
-        }
-    }
+    timestamps: true
 });
+
+export const UserModel = mongoose.model<UserDocument>("User", UserSchema);
+
+export default UserModel;

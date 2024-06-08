@@ -40,7 +40,7 @@ export function checkEnv() {
 
     try {
         // reassign process.env to the parsed env variables
-        process.env = envVariables.parse(process.env);
+        Object.assign(process.env, envVariables.parse(process.env));
     } catch (e) {
         if (e instanceof ZodError) {
             console.error(e.errors);
@@ -54,6 +54,6 @@ export function checkEnv() {
 
 declare global {
     namespace NodeJS {
-        interface ProcessEnv extends infer<typeof envVariables> {}
+        interface ProcessEnv extends infer<typeof envVariables> { }
     }
 }

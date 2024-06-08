@@ -1,0 +1,259 @@
+openapi: 3.0.0
+info:
+  title: Time Tracking API
+  version: 1.0.0
+  description: API endpoints for a time tracking tool utilizing eSAW to generate signed timesheets.
+
+servers:
+  - url: "http://localhost:8080"
+    description: Development
+
+
+tags:
+  - name: Authentication
+    description: Endpoints for user authentication
+  - name: User
+    description: Endpoints for user profile management
+  - name: Admin
+    description: Endpoints for admin users
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        role:
+          type: string
+          example: user
+        email:
+          type: string
+        username:
+          type: string
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: integer
+
+paths:
+  /auth/register:
+    post:
+      summary: Registers a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "Max Mustardman"
+                email:
+                  type: string
+                  example: email
+                password:
+                  type: string
+                  description: Password must be at least 10 chacarcters long. Max length is 255 characters.
+      responses:
+        "201":
+          description: Successfully created a new user.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User successfully created, you can log in now.
+        "409":
+          description: Conflict - A user with the given email already exists.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: A user with the given email already exists.
+                  field:
+                    type: string
+                    example: email
+                  value:
+                    type: string
+                    example: user@example.com
+        "400":
+          description: Bad request - The request data is not valid.
+        "500":
+          description: Internal server error - An error occurred on the server.
+
+  /auth/login:
+    post:
+      summary: Authenticates a user and returns a JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        200:
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                  refreshToken:
+                    type: string
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: 664c9b659308b251cf9d7930
+                      email:
+                        type: string
+                        example: some@example.com
+                      username:
+                        type: string
+                        example: some example
+                      role:
+                        type: string
+                        example: user
+        401:
+          description: Authentication failed
+
+  /auth/refresh:
+    post:
+      summary: Refreshes the JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+      responses:
+        200:
+          description: Token refreshed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+        401:
+          description: Invalid refresh token
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logs out a user
+      description: Invalidates the user's current session or access token.
+      operationId: logoutUser
+      responses:
+        "200":
+          description: Successfully logged out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User successfully logged out."
+        "401":
+          description: Unauthorized if the user is not logged in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized access."
+      security:
+        - bearerAuth: []
+
+  /user/profile:
+    get:
+      summary: Retrieves the logged-in user's profile
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Profile data retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        401:
+          description: Unauthorized
+
+    put:
+      summary: Updates the logged-in user's profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  nullable: true
+                email:
+                  type: string
+                  nullable: true
+                password:
+                  type: boolean
+                  nullable: true
+      responses:
+        200:
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                    nullable: true
+                  email:
+                    type: string
+                    nullable: true
+                  password:
+                    type: boolean
+                    nullable: true
+        204:
+          description: No update
+        400:
+          description: Invalid request
+        401:
+          description: Unauthorized
+
+security:
+  - bearerAuth: []
