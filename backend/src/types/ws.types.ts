@@ -14,7 +14,7 @@ export type WSGame = {
 
     // the timestamp when the game was started
     game_started: Date;
-    
+
     moves: Array<Move>;
 
     // the player that is currently playing - next move swaps the two letters
@@ -60,6 +60,7 @@ export type MessageType =
     | 'lobby_chat'
     | 'game_move'
     | 'game_state'
+    | 'auth'
     | 'error';
 
 interface BaseMessage<T extends MessageType, P> {
@@ -75,6 +76,7 @@ export type Request =
     | BaseMessage<'lobby_leave', { user: string; lobbyName: string }>
     | BaseMessage<'lobby_kick', { user: string; lobbyName: string; target: string }>
     | BaseMessage<'lobby_chat', { user: string; lobbyName: string; message: string }>
+    | BaseMessage<'auth', { token: string }>
     | BaseMessage<'game_move', { user: string; lobbyName: string; move: any }>;
 
 // Response Types
@@ -88,4 +90,5 @@ export type Response =
     | BaseMessage<'lobby_chat', { user: string; lobbyName: string; message: string }>
     | BaseMessage<'game_move', { user: string; lobbyName: string; move: any }>
     | BaseMessage<'game_state', { lobbyName: string; state: any }>
+    | BaseMessage<'auth', { success: boolean; error?: string }>
     | BaseMessage<'error', { error: string }>;
