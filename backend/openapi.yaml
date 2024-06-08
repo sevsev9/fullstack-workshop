@@ -34,6 +34,7 @@ components:
           example: user
         email:
           type: string
+          description: will always be lowercased
         username:
           type: string
     Error:
@@ -131,6 +132,7 @@ paths:
                       email:
                         type: string
                         example: some@example.com
+                        description: will always be lowercased
                       username:
                         type: string
                         example: some example

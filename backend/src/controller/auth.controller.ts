@@ -10,6 +10,7 @@ import { signJwt } from "../util/jwt.util";
 import { createUser, validateUserCredentials } from "../service/user.service";
 import type { RefreshAccessTokenInput } from "../schema/auth.schema";
 import { UserJwtPayload } from "../types/jwt.types";
+import { ApplicationError, ErrorCode } from "../types/errors";
 
 /**
  * Handles the registration of a user.
@@ -119,6 +120,15 @@ export async function loginHandler(
             user: user
         })
     } catch (e) {
+        if (e instanceof ApplicationError) {
+            const err = e as ApplicationError;
+
+            if (err.errorCode === ErrorCode.USER_NOT_FOUND) {
+                logger.warn(`{Auth Controller} - User ${req.body.email} not found.`);
+                return res.status(404).json({ message: err.message });
+            }
+        }
+
         logger.warn(`{Auth Controller} - Error while logging in user ${req.body.email}: [${(e as Error).name}]: ${(e as Error).message}`);
         res.status(401).json({ message: (e as Error).message });
     }

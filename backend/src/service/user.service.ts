@@ -1,3 +1,4 @@
+import { log } from "console";
 import { ROLE, User, UserDocument } from "../model/user.model";
 import UserModel from "../model/user.model";
 import { ApplicationError, ErrorCode } from "../types/errors";
@@ -69,10 +70,14 @@ export async function createUser(
  * @throws If the user has an invalid password
  */
 export async function validateUserCredentials(email: string, password: string) {
-  const user = await UserModel.findOne({ email }, { password: true, _id: true }).exec();
+  logger.info(`{User Service} - Validating credentials for user with email "${email}"...`);
 
+  const user = await UserModel.findOne({ email }, { __v: false }).exec();
+
+  console.log(user);
+  
   if (!user) {
-    throw new ApplicationError("User not found", ErrorCode.USER_NOT_FOUND);
+    throw new ApplicationError(`User with email "${email}" not found`, ErrorCode.USER_NOT_FOUND);
   }
 
   // check if a password is set for the user (could be oauth user)
