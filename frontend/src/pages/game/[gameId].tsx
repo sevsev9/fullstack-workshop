@@ -1,6 +1,7 @@
 import HomeLayout from "@/layouts/HomeLayout";
 import LobbyCard from "@/components/LobbyCard";
-import { type WSLobby } from "../../../backend/src/types/ws.types";
+import { type WSLobby } from "../../../../backend/src/types/ws.types";
+import { useRouter } from "next/router";
 
 const lobbies: WSLobby[] = [
   {
@@ -26,19 +27,13 @@ const lobbies: WSLobby[] = [
   },
 ];
 
-export default function Home() {
-  return (
-    <div className="space-y-8">
-      <h1 className="text-3xl font-bold">Lobbies</h1>
-      <section className="space-y-2">
-        {lobbies.map((lobby) => (
-          <LobbyCard key={lobby.game_id} lobby={lobby} />
-        ))}
-      </section>
-    </div>
-  );
+export default function Game() {
+  const router = useRouter();
+  const id = router.query.gameId as string;
+
+  return <p>{id}</p>;
 }
 
-Home.getLayout = (page: React.ReactElement) => {
+Game.getLayout = (page: React.ReactElement) => {
   return <HomeLayout>{page}</HomeLayout>;
 };
