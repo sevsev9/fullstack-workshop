@@ -30,6 +30,7 @@ export default function Home() {
   return (
     <div className="space-y-8">
       <h1 className="text-3xl font-bold">Lobbies</h1>
+
       <section className="space-y-2">
         {lobbies.map((lobby) => (
           <LobbyCard key={lobby.game_id} lobby={lobby} />
