@@ -1,10 +1,10 @@
 import express from "express";
-import cors from 'cors';
 import mongoose from "mongoose";
 import fs from "fs/promises";
-import { Server } from 'ws';
+import { Server } from "ws";
 
-import connect from './util/mongodb.util';
+import cors from "./util/cors.util";
+import connect from "./util/mongodb.util";
 import logger from "./util/logger.util";
 import { deserializeUser } from "./middleware/deserializeUser";
 import router from "./router";
@@ -16,13 +16,20 @@ import { connectionHandler } from "./ws/handlers";
         checkEnv();
         logger.info("Successfully validated environment.");
 
-
         // attempt to read public key files
         try {
-            logger.info(`Attempting to read key files. PRIV="${process.env.PRIVATE_KEY_FILE}", PUB="${process.env.PUBLIC_KEY_FILE}"`)
+            logger.info(
+                `Attempting to read key files. PRIV="${process.env.PRIVATE_KEY_FILE}", PUB="${process.env.PUBLIC_KEY_FILE}"`,
+            );
             // read keys from files
-            const private_key = await fs.readFile(process.env.PRIVATE_KEY_FILE, "utf-8");
-            const public_key = await fs.readFile(process.env.PUBLIC_KEY_FILE, "utf-8");
+            const private_key = await fs.readFile(
+                process.env.PRIVATE_KEY_FILE,
+                "utf-8",
+            );
+            const public_key = await fs.readFile(
+                process.env.PUBLIC_KEY_FILE,
+                "utf-8",
+            );
 
             // set keys in environment
             process.env.PRIVATE_KEY = private_key;
@@ -47,12 +54,7 @@ import { connectionHandler } from "./ws/handlers";
 
         app.use(express.json());
 
-        app.use(cors({
-            credentials: true,
-            origin: [
-                `http://localhost:${process.env.PORT}`
-            ]
-        }));
+        app.use(cors);
 
         // middleware to handle jwts if they exist in the request headers.
         app.use(deserializeUser);
@@ -61,12 +63,14 @@ import { connectionHandler } from "./ws/handlers";
         app.use("/api", router);
 
         const server = app.listen(process.env.PORT, () => {
-            logger.info(`Super-TicTacToe API running on port ${process.env.PORT}`);
+            logger.info(
+                `Super-TicTacToe API running on port ${process.env.PORT}`,
+            );
         });
 
         const wss = new Server({ server });
 
-        wss.on('connection', connectionHandler);
+        wss.on("connection", connectionHandler);
 
         /**
          * Exit function to handle SIGTERM and SIGINT events
@@ -81,7 +85,7 @@ import { connectionHandler } from "./ws/handlers";
             }
 
             server.close(() => {
-                logger.info("Server shut down complete.")
+                logger.info("Server shut down complete.");
             });
 
             process.exit(0);
@@ -92,17 +96,22 @@ import { connectionHandler } from "./ws/handlers";
         process.on("SIGTERM", exit);
     } catch (e) {
         if (e instanceof Error) {
-            
             // address in use error
             if (e.message.includes("EADDRINUSE")) {
-                logger.error(`Error starting server: Port ${process.env.PORT} is already in use.`);
+                logger.error(
+                    `Error starting server: Port ${process.env.PORT} is already in use.`,
+                );
                 process.exit(1);
             } else {
-                logger.error(`Error starting server: [${e.name}]:${e.message} [${e.stack?.substring(0, 100)}...]`);
+                logger.error(
+                    `Error starting server: [${e.name}]:${e.message} [${e.stack?.substring(0, 100)}...]`,
+                );
             }
         }
 
-        logger.error(`Error starting server: [${(e as Error).name}]:${(e as Error).message} [${(e as Error).stack?.substring(0, 100)}...]`);
+        logger.error(
+            `Error starting server: [${(e as Error).name}]:${(e as Error).message} [${(e as Error).stack?.substring(0, 100)}...]`,
+        );
         logger.error(e);
         process.exit(1);
     }
