@@ -1,5 +1,4 @@
-import { log } from "console";
-import { ROLE, User, UserDocument } from "../model/user.model";
+import { ROLE, User } from "../model/user.model";
 import UserModel from "../model/user.model";
 import { ApplicationError, ErrorCode } from "../types/errors";
 import logger from "../util/logger.util";

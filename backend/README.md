@@ -16,3 +16,35 @@ ACCESS_TOKEN_TTL=15m
 REFRESH_TOKEN_TTL=30d
 LOG_LEVEL=debug
 ```
+
+## Features
+
+- [x] JWT Auth
+    - [x] register
+    - [x] login
+    - [x] refresh
+    - [x] logout
+- [x] User
+    - [x] Update User
+    - [x] Get User Profile
+    - [ ] Game Stats
+- [ ] Lobby and Game
+    - [ ] Lobby
+        - [ ] Create Lobby
+        - [ ] Join Lobby
+        - [ ] Leave Lobby
+            - If the lobby owner leaves the lobby the lobby is automatically deleted and the other user is kicked
+        - [ ] Kick Player from Lobby
+        - [ ] Lobby Chat
+    - [ ] Game
+        - [ ] Game State
+            - [ ] Game Start
+            - [ ] Game End
+                - [ ] Win
+                - [ ] Lose
+                - [ ] Draw
+                - [ ] Surrender (also if opponent leaves)
+        - [ ] Game Move
+            - [ ] Player (client -> backend)
+                - [ ] Validate move
+            - [ ] Opponent (backend -> client)

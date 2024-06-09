@@ -2,12 +2,14 @@ import express from "express";
 import cors from 'cors';
 import mongoose from "mongoose";
 import fs from "fs/promises";
+import { Server } from 'ws';
 
 import connect from './util/mongodb.util';
 import logger from "./util/logger.util";
 import { deserializeUser } from "./middleware/deserializeUser";
 import router from "./router";
 import { checkEnv } from "./util/env.util";
+import { connectionHandler } from "./ws/handlers";
 
 (async () => {
     try {
@@ -61,6 +63,10 @@ import { checkEnv } from "./util/env.util";
         const server = app.listen(process.env.PORT, () => {
             logger.info(`Super-TicTacToe API running on port ${process.env.PORT}`);
         });
+
+        const wss = new Server({ server });
+
+        wss.on('connection', connectionHandler);
 
         /**
          * Exit function to handle SIGTERM and SIGINT events
