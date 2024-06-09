@@ -1,5 +1,8 @@
-import "@/styles/globals.css";
+import { Toaster } from "@/components/ui/sonner";
+import AuthProvider from "@/context/AuthContext";
 import { AppPropsWithLayout } from "@/types/next";
+
+import "@/styles/globals.css";
 
 export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page: React.ReactElement) => page);
@@ -8,5 +11,10 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
     return getLayout(<Component {...pageProps} />);
   };
 
-  return renderComponent();
+  return (
+    <AuthProvider>
+      {renderComponent()}
+      <Toaster />
+    </AuthProvider>
+  );
 }
