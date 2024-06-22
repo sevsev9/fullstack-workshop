@@ -21,6 +21,7 @@ import { connectionHandler } from "./ws/handlers";
             logger.info(
                 `Attempting to read key files. PRIV="${process.env.PRIVATE_KEY_FILE}", PUB="${process.env.PUBLIC_KEY_FILE}"`,
             );
+
             // read keys from files
             const private_key = await fs.readFile(
                 process.env.PRIVATE_KEY_FILE,
@@ -108,11 +109,8 @@ import { connectionHandler } from "./ws/handlers";
                 );
             }
         }
-
-        logger.error(
-            `Error starting server: [${(e as Error).name}]:${(e as Error).message} [${(e as Error).stack?.substring(0, 100)}...]`,
-        );
-        logger.error(e);
+    
+        logger.error("Exiting due to error: ", e);
         process.exit(1);
     }
 })();
