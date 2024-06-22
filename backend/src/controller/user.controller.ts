@@ -3,9 +3,10 @@ import { Request, Response } from "express";
 import logger from "../util/logger.util";
 import { UpdateUserProfileInput } from "../schema/user.schema";
 import { UpdatedFields, findUserById, updateUser } from "../service/user.service";
+import { CustomSchemaExpressHandler } from "./handler.type";
 
 export async function getUserProfileHandler(
-    req: Request,
+    _: Request,
     res: Response
 ) {
     const uid = res.locals.user._id;
@@ -22,10 +23,8 @@ export async function getUserProfileHandler(
 
 }
 
-export async function updateUserProfileHandler(
-    req: Request<{}, {}, UpdateUserProfileInput["body"]>,
-    res: Response
-) {
+
+export const updateUserProfileHandler: CustomSchemaExpressHandler<UpdateUserProfileInput> = async (req, res) => {
     try {
         console.log(req.body);
 
@@ -44,9 +43,9 @@ export async function updateUserProfileHandler(
             message: `Successfully updated data`,
             updates
         });
-    } catch (e) {
-        logger.warn(`{User Controller} - [${(e as Error).name}] - ${(e as Error).message}`);
+    } catch (e: any) {
+        logger.warn(`{User Controller} - [${e.name}] - ${e.message}`);
 
-        return res.status(500).json(e)
+        return res.status(500).json(e);
     }
 }

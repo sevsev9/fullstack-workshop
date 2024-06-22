@@ -11,14 +11,13 @@ import { createUser, validateUserCredentials } from "../service/user.service";
 import type { RefreshAccessTokenInput } from "../schema/auth.schema";
 import { UserJwtPayload } from "../types/jwt.types";
 import { ApplicationError, ErrorCode } from "../types/errors";
+import { CustomSchemaExpressHandler } from "./handler.type";
+import { pick } from "lodash";
 
 /**
  * Handles the registration of a user.
  */
-export async function registerHandler(
-    req: Request<{}, {}, RegisterUserInput["body"]>,
-    res: Response
-) {
+export const registerHandler: CustomSchemaExpressHandler<RegisterUserInput> = async (req, res) => {
     const { email, username, password } = req.body;
 
     logger.info(`{Auth Controller} - register user body: ${JSON.stringify(req.body)}`);
@@ -78,11 +77,7 @@ export async function registerHandler(
  * Handles the login of a user.
  * @param req A request containing the input required for a login procedure
  */
-export async function loginHandler(
-    req: Request<{}, {}, LoginUserInput["body"]>,
-    res: Response
-) {
-
+export const loginHandler: CustomSchemaExpressHandler<LoginUserInput> = async (req, res) => {
     try {
         logger.debug(`{Login Handler} - Validating credentials for user ${req.body.email}...`);
 
@@ -102,17 +97,14 @@ export async function loginHandler(
 
         logger.debug("{Auth Controller} - session created: " + session.id + "for user " + user.email);
 
-        // create new JWTs
-        const access_token = signJwt(
-            { _id: user._id, role: user.role, session_id: session._id } as UserJwtPayload,
-            { expiresIn: process.env.ACCESS_TOKEN_TTL }
-        )
+        // create user info object to sign jwt with
+        const userinfo = {...pick(user, ["_id", "username", "email", "role"]), session_id: session._id};
 
-        // create new JWTs
-        const refresh_token = signJwt(
-            { _id: user._id, role: user.role, session_id: session._id } as UserJwtPayload,
-            { expiresIn: process.env.REFRESH_TOKEN_TTL }
-        )
+        // create new access JWT
+        const access_token = signJwt( userinfo as UserJwtPayload, { expiresIn: process.env.ACCESS_TOKEN_TTL } );
+
+        // create new refresh JWT
+        const refresh_token = signJwt( userinfo as UserJwtPayload, { expiresIn: process.env.REFRESH_TOKEN_TTL } );
 
         return res.status(200).json({
             access_token,
@@ -140,10 +132,7 @@ export async function loginHandler(
  * @param req A request containing the x-refresh header with the refresh token
  * @param res Responds with a json body containing the new access token if the procedure succeeded
  */
-export async function refreshAccessTokenHandler(
-    req: Request<{}, {}, RefreshAccessTokenInput["body"]>,
-    res: Response
-) {
+export const refreshAccessTokenHandler: CustomSchemaExpressHandler<RefreshAccessTokenInput> = async (req, res) => {
     logger.debug(`{Auth Controller} - Attempting to issue new access token for refresh token: ${req.body.refresh_token}`);
 
     const at = await reIssueAccessToken(req.body.refresh_token);
@@ -165,7 +154,7 @@ export async function refreshAccessTokenHandler(
  * @param res response containing locals with the session id to invalidate
  */
 export async function logoutHandler(
-    req: Request,
+    _: Request,
     res: Response
 ) {
     try {
