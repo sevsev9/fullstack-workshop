@@ -2,6 +2,7 @@ import { ROLE } from "../model/user.model";
 
 export type UserJwtPayload = {
     _id: string;
+    username: string;
     role: ROLE;
     session_id: string;
     exp?: number; // expiration date

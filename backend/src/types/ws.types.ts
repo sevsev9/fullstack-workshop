@@ -1,4 +1,3 @@
-import exp from "constants";
 import { Move } from "../model/game.model";
 import { UserDocument } from "../model/user.model";
 import WebSocket from "ws";
@@ -64,7 +63,6 @@ export type MessageType =
 export interface BaseMessage<T extends MessageType, P> {
     type: T;
     payload: P;
-    token?: string;
 }
 
 // Request Types
@@ -94,5 +92,5 @@ export type ErrorResponse = BaseMessage<'error', { error: string }>;
 export type Response = GlobalChatResponse | LobbyCreateResponse | LobbyJoinResponse | LobbyLeaveResponse | LobbyKickResponse | LobbyKickedResponse | LobbyChatResponse | GameMoveResponse | GameStateResponse | WarningResponse | ErrorResponse;
 
 export interface WebSocketWithAuth extends WebSocket {
-    user?: VerifyJwtResult;
+    user: VerifyJwtResult;
 }
