@@ -81,13 +81,13 @@ export async function validateUserCredentials(email: string, password: string) {
 
   // check if a password is set for the user (could be oauth user)
   if (!user.password) {
-    throw new Error("No password stored on user - please use OAuth to login");
+    throw new ApplicationError("No password stored on user - please use OAuth to login", ErrorCode.NO_PASSWORD_STORED);
   }
 
   // verify password
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    throw new Error("Invalid password");
+    throw new ApplicationError("Invalid password", ErrorCode.INVALID_PASSWORD);
   }
 
   return omit(user, "password", "__v");
@@ -109,7 +109,7 @@ export async function updateUser(user_id: string, updateData: Partial<User>): Pr
 
     const updatedUser = await UserModel.findByIdAndUpdate(user_id, { $set: updateData }, { new: true }).exec();
     if (!updatedUser) {
-      throw new Error('User not found');
+      throw new ApplicationError(`User with id ${user_id} not found`, ErrorCode.USER_NOT_FOUND);
     }
 
     // prepare the return object
@@ -120,6 +120,14 @@ export async function updateUser(user_id: string, updateData: Partial<User>): Pr
       password: updateData.password ? true : undefined
     }
   } catch (e) {
+    const err = e as Error;
+
+    // check if the error is a mongoose validation error
+    if (err.name === "ValidationError") {
+      logger.error(`{User Service} - Update for user ${user_id} failed: ${err.message}`);
+      throw new ApplicationError(err.message, ErrorCode.VALIDATION_ERROR);
+    }
+
     logger.error(`{User Service} - Update for user ${user_id} failed: ${e}`);
 
     throw e;
