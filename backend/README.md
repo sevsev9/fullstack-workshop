@@ -27,18 +27,19 @@ o = 0
  - The game can either be won by winning 3 fields in a row or by amount of fields won
  - if noone got a series and the points are equal it is considered a draw.
 
-2. **highest score wins**
+2. **Ultmate TicTacToe**
  - If a player scores a point in a field it is counted towards the player's score.
  - If a player plays a move that would land the next move into a field that is fully played in, the player can choose any field to play in.
  - The game is won by the player with the highest score.
  - If the scores are equal, the game is considered a draw.
 
-3. **Classic TicTacToe**
+3. **Super TicTacToe**
  - The game is won by the player that wins 3 fields in a row.
  - If no player wins, the game is considered a draw.
  - If a won field is chosen, the next player plays in the field that is one index higher than the won field.
 
- 
+4. **Normal TicTacToe**
+ - A classic 3x3 
 
 ## Runnng the Backend for Development
 
