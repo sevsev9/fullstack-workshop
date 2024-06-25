@@ -1,13 +1,6 @@
+import MoveModel, { Move } from "./move.model";
 import { UserDocument } from "./user.model";
-
-export type Move = {
-    player: UserDocument["id"];
-
-    // rfc3339
-    timestamp: string;
-
-    position: [number, number];
-};
+import mongoose, { Document } from "mongoose";
 
 export type Game = {
     game_id: string; // generated uuid v4
@@ -16,3 +9,15 @@ export type Game = {
     moves: Array<Move>;
     winner?: string; // objectid
 };
+
+export type GameDocument = Document<string, any, Game>;
+
+export const GameModel = mongoose.model<Game>("Game", new mongoose.Schema<Game>({
+    game_id: { type: String, required: true },
+    player_x: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    player_o: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    moves: { type: [MoveModel], required: true },
+    winner: { type: mongoose.Schema.Types.ObjectId }
+}));
+
+export default GameModel;
