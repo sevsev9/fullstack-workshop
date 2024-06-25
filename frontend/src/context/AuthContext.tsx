@@ -11,10 +11,12 @@ import {
 
 type AuthContextType = {
   user?: User;
+  updateUserState: (user: Partial<User>) => void;
   setUser: (user?: User) => void;
 };
 
 const AuthContext = createContext<AuthContextType>({
+  updateUserState: () => {},
   setUser: () => {},
 });
 
@@ -66,6 +68,15 @@ export default function AuthProvider({
     }
   };
 
+  // can only be called if there is already a user in state
+  const updateUserState = (updateProps: Partial<User>) => {
+    if (!user) return;
+    setUser({
+      ...user,
+      ...updateProps,
+    });
+  };
+
   if (loading) return null;
 
   return (
@@ -73,6 +84,7 @@ export default function AuthProvider({
       value={{
         user,
         setUser,
+        updateUserState,
       }}
     >
       {children}
@@ -81,11 +93,12 @@ export default function AuthProvider({
 }
 
 export function useUserContext() {
-  const { user, setUser } = useContext(AuthContext);
+  const { user, setUser, updateUserState } = useContext(AuthContext);
 
   return {
     user: user!,
     setUser,
     isAuthed: !!user,
+    updateUserState,
   };
 }

@@ -7,6 +7,11 @@ const defaultHeaders: Record<string, string> = {
   "Content-Type": "application/json",
 };
 
+export type ApiPutResponse<T> = {
+  message: string;
+  updates: T;
+};
+
 type ApiGetRequest = {
   endpoint: string;
   authRequired?: boolean;
@@ -67,6 +72,40 @@ export const apiPost = async <Body, Out>({
   try {
     const res = await fetch(`${API_URL}${endpoint}`, {
       method: "POST",
+      headers: getHeaders(headers, authRequired),
+      ...(body && {
+        body: JSON.stringify(body),
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error(await res.text());
+    }
+
+    const data = (await res.json()) as Out;
+    return {
+      success: true,
+      data,
+    };
+  } catch (e) {
+    if (process.env.NODE_ENV === "development") console.error(e);
+
+    return {
+      success: false,
+      message: "failed",
+    };
+  }
+};
+
+export const apiPut = async <Body, Out>({
+  endpoint,
+  body,
+  authRequired = false,
+  headers = defaultHeaders,
+}: ApiPostRequest<Body>): Promise<ServiceResult<ApiPutResponse<Out>>> => {
+  try {
+    const res = await fetch(`${API_URL}${endpoint}`, {
+      method: "PUT",
       headers: getHeaders(headers, authRequired),
       ...(body && {
         body: JSON.stringify(body),
