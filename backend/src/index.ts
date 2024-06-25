@@ -71,7 +71,7 @@ import { connectionHandler } from "./ws/handlers";
 
         const wss = new Server({ server });
 
-        wss.on("connection", connectionHandler);
+        wss.on("connection", connectionHandler(wss));
 
         /**
          * Exit function to handle SIGTERM and SIGINT events
