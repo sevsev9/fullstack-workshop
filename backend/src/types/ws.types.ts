@@ -37,7 +37,7 @@ export type WSLobby = {
     name: string;
     created: Date;
     players: Array<WSPlayerInfo>;
-    // chatHistory: Array<{ user: UserDocument["username"], message: string, timestamp: Date }>;
+    chatHistory: Array<{ user: UserDocument["username"], message: string, timestamp: Date }>;
 
     /**
      * The game that is currently being played in this lobby.

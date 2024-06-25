@@ -75,6 +75,7 @@ export async function reIssueAccessToken(refreshToken: string): Promise<{ error:
 
         const accessToken = signJwt({
             _id: user._id,
+            username: user.username,
             role: user.role,
             session_id: session._id
         }, { expiresIn: process.env.ACCESS_TOKEN_TTL });

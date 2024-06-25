@@ -1,5 +1,44 @@
 # SuperTicTacToe Backend
 
+## Game Modes
+
+### Example
+x = 1
+o = 0
+
+| - | - | - ||| - | x | - ||| - | o | - |
+| - | o | - ||| - | x | o ||| - | x | - |
+| - | - | o ||| - | o | - ||| - | - | - |
+-----------------------------------------
+| - | - | - ||| x | o | x ||| x | - | - |
+| - | x | - ||| o | x | o ||| - | x | - |
+| - | - | - ||| o | o | x ||| - | - | x |
+-----------------------------------------
+| - | x | - ||| - | - | - ||| - | - | o |
+| - | o | - ||| - | o | - ||| - | o | - |
+| - | - | - ||| x | x | - ||| - | - | x |
+
+### Gameplay Options
+
+1. **Meta TicTacToe**
+ - If a player wins a subfield, the field cannot be played in anymore.
+ - If the won field is chosen, the next player plays in the field that is one index higher than the won field.
+ - The won field is marked with the winning player's letter.
+ - The game can either be won by winning 3 fields in a row or by amount of fields won
+ - if noone got a series and the points are equal it is considered a draw.
+
+2. **highest score wins**
+ - If a player scores a point in a field it is counted towards the player's score.
+ - If a player plays a move that would land the next move into a field that is fully played in, the player can choose any field to play in.
+ - The game is won by the player with the highest score.
+ - If the scores are equal, the game is considered a draw.
+
+3. **Classic TicTacToe**
+ - The game is won by the player that wins 3 fields in a row.
+ - If no player wins, the game is considered a draw.
+ - If a won field is chosen, the next player plays in the field that is one index higher than the won field.
+
+ 
 
 ## Runnng the Backend for Development
 
