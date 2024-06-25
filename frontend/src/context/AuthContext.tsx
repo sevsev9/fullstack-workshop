@@ -1,26 +1,21 @@
 import { createContext, useContext, useEffect, useState } from "react";
-
-type RegisterProps = Credentials & {
-  username: string;
-};
-
-type Credentials = {
-  email: string;
-  password: string;
-};
+import * as userService from "@/services/user.service";
+import * as authService from "@/services/auth.service";
+import { toast } from "sonner";
+import type { User } from "../../../backend/src/model/user.model";
+import type { LoginProps, RegisterProps } from "@/services/auth.service";
+import {
+  ACCESS_TOKEN_KEY,
+  REFRESH_TOKEN_KEY,
+} from "@/utils/localstorage.constants";
 
 type AuthContextType = {
-  user: any;
-  login: (credentials: Credentials) => Promise<void>;
-  register: (credentials: RegisterProps) => Promise<void>;
-  logout: () => Promise<void>;
+  user?: User;
+  setUser: (user?: User) => void;
 };
 
 const AuthContext = createContext<AuthContextType>({
-  user: null,
-  login: async () => {},
-  register: async () => {},
-  logout: async () => {},
+  setUser: () => {},
 });
 
 export default function AuthProvider({
@@ -28,59 +23,56 @@ export default function AuthProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
+  const [user, setUser] = useState<User>();
+  const [loading, setLoading] = useState(true);
 
-  // update local storage
-  // refresh token
-  // auth token
   useEffect(() => {
-    if (token) {
-      localStorage.setItem("token", token);
-    } else {
-      localStorage.removeItem("token");
-    }
-  }, [token]);
+    me()
+      .then((user) => setUser(user))
+      .finally(() => setLoading(false));
+  }, []);
 
-  const login = async (credentials: Credentials) => {
-    const url = "http://localhost:8080/api/auth/login";
-    await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(credentials),
-    });
+  const me = async () => {
+    const result = await userService.getProfile();
+    return result.success ? result.data : undefined;
   };
 
-  const register = async (props: RegisterProps) => {
-    const url = "http://localhost:8080/api/auth/register";
-    await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(props),
-    });
+  const login = async (credentials: LoginProps) => {
+    const result = await authService.login(credentials);
+    if (!result.success) {
+      toast(result.message);
+    } else {
+      setUser(result.data.user);
+      localStorage.setItem(ACCESS_TOKEN_KEY, result.data.access_token);
+      localStorage.setItem(REFRESH_TOKEN_KEY, result.data.refresh_token);
+    }
   };
 
   const logout = async () => {
-    const url = "http://localhost:8080/api/auth/logout";
-    await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const result = await authService.logout();
+    if (!result.success) {
+      toast(result.message);
+    } else {
+      setUser(undefined);
+      localStorage.removeItem(ACCESS_TOKEN_KEY);
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
+    }
   };
+
+  const register = async (params: RegisterProps) => {
+    const result = await authService.register(params);
+    if (!result.success) {
+      toast(result.message);
+    }
+  };
+
+  if (loading) return null;
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        login,
-        register,
-        logout,
+        setUser,
       }}
     >
       {children}
@@ -89,12 +81,11 @@ export default function AuthProvider({
 }
 
 export function useUserContext() {
-  const { user, login, register, logout } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
+
   return {
-    user,
-    login,
-    register,
-    logout,
-    isAuthed: false,
+    user: user!,
+    setUser,
+    isAuthed: !!user,
   };
 }
