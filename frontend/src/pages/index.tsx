@@ -1,6 +1,7 @@
 import HomeLayout from "@/layouts/HomeLayout";
 import LobbyCard from "@/components/LobbyCard";
 import { type WSLobby } from "../../../backend/src/types/ws.types";
+import useWebSocket from "@/hooks/useWebSocket";
 
 const lobbies: WSLobby[] = [
   {
@@ -24,6 +25,8 @@ const lobbies: WSLobby[] = [
 ];
 
 export default function Home() {
+  const { isOpen } = useWebSocket("http://localhost:8080");
+
   return (
     <div className="space-y-8">
       <h1 className="text-3xl font-bold">Lobbies</h1>

@@ -2,10 +2,7 @@ import { toast } from "sonner";
 import { useUserContext } from "@/context/AuthContext";
 import * as authService from "@/services/auth.service";
 import type { LoginProps, RegisterProps } from "@/services/auth.service";
-import {
-  ACCESS_TOKEN_KEY,
-  REFRESH_TOKEN_KEY,
-} from "@/utils/localstorage.constants";
+import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "@/utils/localstorage";
 import { useRouter } from "next/router";
 
 export default function useAuthService() {

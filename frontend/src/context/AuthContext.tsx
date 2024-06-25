@@ -4,10 +4,7 @@ import * as authService from "@/services/auth.service";
 import { toast } from "sonner";
 import type { User } from "../../../backend/src/model/user.model";
 import type { LoginProps, RegisterProps } from "@/services/auth.service";
-import {
-  ACCESS_TOKEN_KEY,
-  REFRESH_TOKEN_KEY,
-} from "@/utils/localstorage.constants";
+import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "@/utils/localstorage";
 
 type AuthContextType = {
   user?: User;

@@ -1,4 +1,4 @@
-import { ACCESS_TOKEN_KEY } from "@/utils/localstorage.constants";
+import { ACCESS_TOKEN_KEY, getLocalStorageItem } from "@/utils/localstorage";
 import { type ServiceResult } from "@/types/service.types";
 
 const API_URL = "http://localhost:8080/api";
@@ -27,7 +27,7 @@ type ApiPostRequest<T> = {
 
 const getHeaders = (headers: Record<string, string>, authRequired: boolean) => {
   if (authRequired) {
-    headers["Authorization"] = `${localStorage.getItem(ACCESS_TOKEN_KEY)}`;
+    headers["Authorization"] = `${getLocalStorageItem(ACCESS_TOKEN_KEY)}`;
   }
   return headers;
 };
