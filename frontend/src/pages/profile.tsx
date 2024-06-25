@@ -16,7 +16,7 @@ const lobbies: WSLobby[] = [
     players: ["1"],
   },
   {
-    game_id: "2",
+    game_id: "3",
     name: "Game 3",
     created: new Date(),
     players: ["1"],

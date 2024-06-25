@@ -1,13 +1,10 @@
-import { useRouter } from "next/router";
 import { FormEvent, useState } from "react";
-import { useUserContext } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import useAuthService from "@/hooks/useAuthService";
 
 function useLoginForm() {
-  const router = useRouter();
-  const { login } = useUserContext();
+  const { login } = useAuthService();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -20,22 +17,7 @@ function useLoginForm() {
     }
 
     setLoading(true);
-
-    login({ email, password })
-      .then(() => {
-        toast("You are logged in");
-        router.push("/");
-        // TODO
-        // show sonner
-      })
-      .catch(() => {
-        toast("Failed to login");
-        // TODO
-        // show sonner
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    login({ email, password }).finally(() => setLoading(false));
   };
 
   return {
@@ -53,7 +35,7 @@ export default function LoginForm() {
     useLoginForm();
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-2">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <Input
         placeholder="Email"
         value={email}
@@ -66,7 +48,9 @@ export default function LoginForm() {
         onChange={(e) => setPassword(e.target.value)}
       />
 
-      <Button loading={loading}>Login</Button>
+      <Button className="w-full" loading={loading}>
+        Login
+      </Button>
     </form>
   );
 }

@@ -1,15 +1,15 @@
 import HomeLayout from "@/layouts/HomeLayout";
 import LoginForm from "@/components/LoginForm";
+import AuthLayout from "@/layouts/AuthLayout";
 
 export default function LoginPage() {
-  return (
-    <div className="space-y-8">
-      <h1>Login</h1>
-      <LoginForm />
-    </div>
-  );
+  return <LoginForm />;
 }
 
 LoginPage.getLayout = (page: React.ReactElement) => {
-  return <HomeLayout>{page}</HomeLayout>;
+  return (
+    <HomeLayout>
+      <AuthLayout type="login">{page}</AuthLayout>
+    </HomeLayout>
+  );
 };

@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import useAuthService from "@/hooks/useAuthService";
 
 export default function UserButton() {
   const { isAuthed } = useUserContext();
@@ -31,6 +32,8 @@ export default function UserButton() {
 
 function UserDropdown() {
   const router = useRouter();
+  const { user } = useUserContext();
+  const { logout } = useAuthService();
 
   const items = [
     {
@@ -41,29 +44,28 @@ function UserDropdown() {
     {
       label: "Logout",
       Icon: LogOutIcon,
-      onClick: () => {},
+      onClick: logout,
     },
   ];
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">Username</Button>
+        <Button variant="outline">{user.username}</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuLabel>Email</DropdownMenuLabel>
+        <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {items.map(({ onClick, Icon, label }, i) => {
           return (
-            <React.Fragment key={i}>
-              <DropdownMenuItem
-                className="cursor-pointer gap-4"
-                onClick={onClick}
-              >
-                <Icon size={16} />
-                {label}
-              </DropdownMenuItem>
-            </React.Fragment>
+            <DropdownMenuItem
+              key={i}
+              className="cursor-pointer gap-4"
+              onClick={onClick}
+            >
+              <Icon size={16} />
+              {label}
+            </DropdownMenuItem>
           );
         })}
       </DropdownMenuContent>
