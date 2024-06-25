@@ -3,6 +3,7 @@ import { GameMoveRequest, GlobalChatRequest, LobbyCreateRequest, WSLobby, WebSoc
 import { verifyJwt } from '../util/jwt.util';
 import { uuid } from 'uuidv4';
 import { endGame, updateGameState } from '../service/game.service';
+import loggerUtil from '../util/logger.util';
 
 const lobbies: Record<string, WSLobby> = {};
 const wss: WsServer = {} as WsServer;
@@ -13,27 +14,28 @@ export const connectionHandler = (wss: WsServer) => (ws: WebSocketWithAuth) => {
         wss = wss;
     }
 
-    // verify that the user is authenticated in the on open event
-    ws.on('open', () => {
-        try {
-            const token = ws.protocol;
-            const { valid, expired, decoded, error } = verifyJwt(token);
+    loggerUtil.info('{WebSocket - Connection Handler} - Client has connected');
 
-            // inivalid can also mean expired or malformed
-            if (!valid) {
-                ws.send(JSON.stringify({ type: 'warn', payload: { error: 'Invalid or expired token' } }));
-            }
+    try {
+        const token = ws.protocol;
+        const { valid, expired, decoded, error } = verifyJwt(token);
 
-            ws.user = decoded.user;
-
-            // send the currently active and joinable lobbies to the user
-            const lobbiesList = Object.values(lobbies).filter(e => e.players.length === 1).map((lobby) => ({ name: lobby.name }));
-
-            ws.send(JSON.stringify({ type: 'lobby_list', payload: { lobbies: lobbiesList } } as LobbyListResponse));
-        } catch (err) {
+        // inivalid can also mean expired or malformed
+        if (!valid) {
             ws.send(JSON.stringify({ type: 'warn', payload: { error: 'Invalid or expired token' } }));
         }
-    });
+
+        ws.user = decoded.user;
+
+        loggerUtil.info(`{WebSocket - Connection Handler} - User ${decoded.user.username} was authenticated successfully.`);
+
+        // send the currently active and joinable lobbies to the user
+        const lobbiesList = Object.values(lobbies).filter(e => e.players.length === 1).map((lobby) => ({ name: lobby.name }));
+
+        ws.send(JSON.stringify({ type: 'lobby_list', payload: { lobbies: lobbiesList } } as LobbyListResponse));
+    } catch (err) {
+        ws.send(JSON.stringify({ type: 'warn', payload: { error: 'Invalid or expired token' } }));
+    }
 
 
     ws.on('message', (message: string) => {
@@ -288,7 +290,7 @@ function handleGameMove(ws: WebSocketWithAuth, message: GameMoveRequest) {
 
     // Check if the game is over
     if (newState.finished) {
-        
+
 
         // handles the db logic for ending the game
         endGame(lobby.game);
