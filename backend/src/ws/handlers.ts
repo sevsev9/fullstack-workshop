@@ -1,22 +1,35 @@
 import { Server as WsServer, WebSocket } from 'ws';
-import { GameMoveRequest, GlobalChatRequest, LobbyCreateRequest, WSLobby, WebSocketWithAuth, Request, Response, WSPlayerInfo, LobbyJoinRequest, LobbyLeaveRequest, LobbyChatRequest, GameMoveResponse, GameStateResponse } from '../types/ws.types';
+import { GameMoveRequest, GlobalChatRequest, LobbyCreateRequest, WSLobby, WebSocketWithAuth, Request, Response, WSPlayerInfo, LobbyJoinRequest, LobbyLeaveRequest, LobbyChatRequest, ErrorResponse, GameMoveResponse, LobbyKickedResponse, LobbyListRequest, LobbyListResponse } from '../types/ws.types';
 import { verifyJwt } from '../util/jwt.util';
 import { uuid } from 'uuidv4';
+import { endGame, updateGameState } from '../service/game.service';
 
 const lobbies: Record<string, WSLobby> = {};
+const wss: WsServer = {} as WsServer;
 
 export const connectionHandler = (wss: WsServer) => (ws: WebSocketWithAuth) => {
+    // check if the wss has already been initialized
+    if (!wss) {
+        wss = wss;
+    }
+
     // verify that the user is authenticated in the on open event
     ws.on('open', () => {
         try {
             const token = ws.protocol;
             const { valid, expired, decoded, error } = verifyJwt(token);
 
+            // inivalid can also mean expired or malformed
             if (!valid) {
                 ws.send(JSON.stringify({ type: 'warn', payload: { error: 'Invalid or expired token' } }));
             }
 
             ws.user = decoded.user;
+
+            // send the currently active and joinable lobbies to the user
+            const lobbiesList = Object.values(lobbies).filter(e => e.players.length === 1).map((lobby) => ({ name: lobby.name }));
+
+            ws.send(JSON.stringify({ type: 'lobby_list', payload: { lobbies: lobbiesList } } as LobbyListResponse));
         } catch (err) {
             ws.send(JSON.stringify({ type: 'warn', payload: { error: 'Invalid or expired token' } }));
         }
@@ -65,12 +78,66 @@ export const connectionHandler = (wss: WsServer) => (ws: WebSocketWithAuth) => {
 
     ws.on('close', () => {
         console.log('Client has disconnected');
-        // Handle client disconnect logic
+        
+        // Find the lobby that the user was in
+        const lobby = Object.values(lobbies).find((lobby) => lobby.players.some((player) => player.socket === ws));
+
+        if (!lobby) {
+            return;
+        }
+
+        // Remove the player from the lobby
+        lobby.players = lobby.players.filter((player) => player.socket !== ws);
+
+        // If the player was the last one in the lobby, delete the lobby
+        if (lobby.players.length === 0) {
+            delete lobbies[lobby.name];
+        } else {
+            // Broadcast the new lobby state to all players in the lobby
+            const gameStateMessage: LobbyKickedResponse = {
+                type: 'lobby_kicked',
+                payload: {
+                    lobbyName: lobby.name
+                },
+            };
+
+            lobby.players.forEach((wpi) => {
+                if (wpi.socket.readyState === WebSocket.OPEN) {
+                    wpi.socket.send(JSON.stringify(gameStateMessage));
+                }
+            });
+        }
     });
 }
 
 function sendResponse(ws: WebSocketWithAuth, response: Response) {
     ws.send(JSON.stringify(response));
+}
+
+/**
+ * Sends the updated lobby list to all clients.
+ */
+function broadcastLobbyList() {
+    const lobbiesList = Object.values(lobbies).filter(e => e.players.length === 1).map((lobby) => ({ name: lobby.name }));
+    
+    wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify({ type: 'lobby_list', payload: { lobbies: lobbiesList } } as LobbyListResponse));
+        }
+    });
+}
+
+/**
+ * Sends a message to all clients in a lobby.
+ * @param lobby The lobby to send the message to
+ * @param message The message to send
+ */
+function sendMessagesToLobby(lobby: WSLobby, message: LobbyChatRequest) {
+    lobby.players.forEach((wpi) => {
+        if (wpi.socket.readyState === WebSocket.OPEN) {
+            wpi.socket.send(JSON.stringify(message));
+        }
+    });
 }
 
 function handleGlobalChat(wss: WsServer, ws: WebSocketWithAuth, message: GlobalChatRequest) {
@@ -104,6 +171,9 @@ function handleLobbyCreate(ws: WebSocketWithAuth, message: LobbyCreateRequest) {
     } as WSLobby;
 
     sendResponse(ws, { type: 'lobby_create', payload: { success: true, lobbyName } });
+
+    // Broadcast the updated lobby list to all clients
+    broadcastLobbyList();
 }
 
 function handleLobbyJoin(ws: WebSocketWithAuth, message: LobbyJoinRequest) {
@@ -120,7 +190,11 @@ function handleLobbyJoin(ws: WebSocketWithAuth, message: LobbyJoinRequest) {
         username: ws.user.decoded?.username,
         socket: ws,
     } as WSPlayerInfo);
+
     sendResponse(ws, { type: 'lobby_join', payload: { success: true, lobbyName } });
+
+    // Broadcast the updated lobby list to all clients
+    broadcastLobbyList();
 }
 
 function handleLobbyLeave(ws: WebSocketWithAuth, message: LobbyLeaveRequest) {
@@ -139,6 +213,9 @@ function handleLobbyLeave(ws: WebSocketWithAuth, message: LobbyLeaveRequest) {
     } else {
         sendResponse(ws, { type: 'lobby_leave', payload: { success: true, lobbyName } });
     }
+
+    // Broadcast the updated lobby list to all clients
+    broadcastLobbyList();
 }
 
 function handleLobbyChat(ws: WebSocketWithAuth, message: LobbyChatRequest) {
@@ -161,6 +238,9 @@ function handleLobbyChat(ws: WebSocketWithAuth, message: LobbyChatRequest) {
             wpi.socket.send(JSON.stringify(message));
         }
     });
+
+    // Broadcast the message to all clients in the lobby
+    sendMessagesToLobby(lobby, message);
 }
 
 function handleGameMove(ws: WebSocketWithAuth, message: GameMoveRequest) {
@@ -168,19 +248,35 @@ function handleGameMove(ws: WebSocketWithAuth, message: GameMoveRequest) {
     const lobby = lobbies[lobbyName];
 
     if (!lobby) {
-        sendResponse(ws, { type: 'game_move', payload: { user, lobbyName, move: 'Lobby does not exist' } });
+        sendResponse(ws, {
+            type: 'error',
+            payload: {
+                error: 'Lobby does not exist',
+            }
+        } as ErrorResponse);
+        return;
+    }
+
+    if (!lobby.game) {
+        sendResponse(ws, {
+            type: 'error',
+            payload: {
+                error: 'Game has not started',
+            }
+        } as ErrorResponse);
         return;
     }
 
     // Update game state based on the move
-    // const newState = updateGameState(lobby.gameState, move);
+    const newState = updateGameState(lobby.game, move);
 
     // Broadcast the new game state to all users in the lobby
-    const gameStateMessage: GameStateResponse = {
-        type: 'game_state',
+    const gameStateMessage: GameMoveResponse = {
+        type: 'game_move',
         payload: {
             lobbyName,
-            state: lobby.game, // Use the updated state
+            user,
+            move,
         },
     };
 
@@ -189,4 +285,12 @@ function handleGameMove(ws: WebSocketWithAuth, message: GameMoveRequest) {
             wpi.socket.send(JSON.stringify(gameStateMessage));
         }
     });
+
+    // Check if the game is over
+    if (newState.finished) {
+        
+
+        // handles the db logic for ending the game
+        endGame(lobby.game);
+    }
 }
