@@ -3,12 +3,12 @@ import mongoose from "mongoose";
 import fs from "fs/promises";
 import { Server } from "ws";
 
+import logger from "./util/logger.util";
+import { checkEnv } from "./util/env.util";
 import cors from "./util/cors.util";
 import connect from "./util/mongodb.util";
-import logger from "./util/logger.util";
 import { deserializeUser } from "./middleware/deserializeUser";
 import router from "./router";
-import { checkEnv } from "./util/env.util";
 import { connectionHandler } from "./ws/handlers";
 
 (async () => {
@@ -109,7 +109,7 @@ import { connectionHandler } from "./ws/handlers";
                 );
             }
         }
-    
+
         logger.error("Exiting due to error: ", e);
         process.exit(1);
     }
