@@ -6,12 +6,12 @@ import { endGame, updateGameState } from '../service/game.service';
 import loggerUtil from '../util/logger.util';
 
 const lobbies: Record<string, WSLobby> = {};
-const wss: WsServer = {} as WsServer;
+let wss: WsServer = {} as WsServer;
 
-export const connectionHandler = (wss: WsServer) => (ws: WebSocketWithAuth) => {
+export const connectionHandler = (wss_server: WsServer) => (ws: WebSocketWithAuth) => {
     // check if the wss has already been initialized
-    if (!wss) {
-        wss = wss;
+    if (!wss_server) {
+        wss = wss_server;
     }
 
     loggerUtil.info('{WebSocket - Connection Handler} - Client has connected');
@@ -21,20 +21,29 @@ export const connectionHandler = (wss: WsServer) => (ws: WebSocketWithAuth) => {
         const { valid, expired, decoded, error } = verifyJwt(token);
 
         // inivalid can also mean expired or malformed
-        if (!valid) {
-            ws.send(JSON.stringify({ type: 'warn', payload: { error: 'Invalid or expired token' } }));
+        if (!valid || !decoded) {
+            ws.send(JSON.stringify({ type: 'error', payload: { error: 'Invalid or expired token' } }));
+
+            // close the connection
+            ws.close();
+            return;
         }
 
-        ws.user = decoded.user;
+        // attach the decoded user to the ws object
+        ws.user = decoded!;
 
-        loggerUtil.info(`{WebSocket - Connection Handler} - User ${decoded.user.username} was authenticated successfully.`);
+        loggerUtil.info(`{WebSocket - Connection Handler} - User ${ws.user.username} was authenticated successfully.`);
 
         // send the currently active and joinable lobbies to the user
         const lobbiesList = Object.values(lobbies).filter(e => e.players.length === 1).map((lobby) => ({ name: lobby.name }));
 
         ws.send(JSON.stringify({ type: 'lobby_list', payload: { lobbies: lobbiesList } } as LobbyListResponse));
     } catch (err) {
-        ws.send(JSON.stringify({ type: 'warn', payload: { error: 'Invalid or expired token' } }));
+        ws.send(JSON.stringify({ type: 'error', payload: { error: 'Invalid or expired token' } }));
+
+        // close the connection
+        ws.close();
+        return;
     }
 
 
@@ -163,8 +172,8 @@ function handleLobbyCreate(ws: WebSocketWithAuth, message: LobbyCreateRequest) {
         created: new Date(),
         players: [
             {
-                user_id: ws.user.decoded?._id,
-                username: ws.user.decoded?.username,
+                user_id: ws.user._id,
+                username: ws.user.username,
                 socket: ws,
             } as WSPlayerInfo
         ],
@@ -188,8 +197,8 @@ function handleLobbyJoin(ws: WebSocketWithAuth, message: LobbyJoinRequest) {
     }
 
     lobby.players.push({
-        user_id: ws.user.decoded?._id,
-        username: ws.user.decoded?.username,
+        user_id: ws.user._id,
+        username: ws.user.username,
         socket: ws,
     } as WSPlayerInfo);
 

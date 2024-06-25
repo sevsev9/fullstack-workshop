@@ -1,7 +1,7 @@
 import { Move } from "../model/move.model";
 import { UserDocument } from "../model/user.model";
 import WebSocket from "ws";
-import { VerifyJwtResult } from "./jwt.types";
+import { UserJwtPayload, VerifyJwtResult } from "./jwt.types";
 
 export type WSPlayerInfo = {
     user_id: UserDocument["_id"],
@@ -149,5 +149,5 @@ export type ErrorResponse = BaseMessage<'error', { error: string }>;
 export type Response = GlobalChatResponse | LobbyCreateResponse | LobbyJoinResponse | LobbyLeaveResponse | LobbyKickResponse | LobbyKickedResponse | LobbyChatResponse | GameStartResponse | GameMoveResponse | GameEndResponse | WarningResponse | ErrorResponse;
 
 export interface WebSocketWithAuth extends WebSocket {
-    user: VerifyJwtResult;
+    user: UserJwtPayload;
 }
