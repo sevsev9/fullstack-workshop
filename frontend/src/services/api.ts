@@ -171,6 +171,30 @@ export const apiPost = async <Body, Out>({
   }
 };
 
+// Function to make POST request
+export const apiDelete = async <Out>({
+  endpoint,
+  headers = {},
+}: ApiRequestOptions & { endpoint: string }): Promise<ServiceResult<Out>> => {
+  try {
+    const response = await axiosInstance.delete(endpoint, {
+      headers,
+    });
+
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error("Failed to post data:", error);
+
+    return {
+      success: false,
+      message: "Failed to post data",
+    };
+  }
+};
+
 // Function to make PUT request
 export const apiPut = async <Body, Out>({
   endpoint,

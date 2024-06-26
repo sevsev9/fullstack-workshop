@@ -6,9 +6,9 @@ export default function HomeLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <div className="h-screen">
       <HomeNavbar />
-      <main className="container mx-auto">{children}</main>
-    </>
+      <main className="container mx-auto mt-16 h-full">{children}</main>
+    </div>
   );
 }
