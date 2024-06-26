@@ -4,7 +4,7 @@ import WebSocket from "ws";
 import { UserJwtPayload, VerifyJwtResult } from "./jwt.types";
 
 export type WSPlayerInfo = {
-    user_id: UserDocument["_id"],
+    userId: UserDocument["_id"],
     username: UserDocument["username"]
     socket: WebSocket
 }

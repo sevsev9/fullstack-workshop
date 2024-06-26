@@ -20,15 +20,8 @@ export async function deserializeUser(req: Request, res: Response, next: NextFun
 
   const { valid, expired, decoded, error } = verifyJwt(accessToken);
 
-  // if the token is invalid
-  if (!valid) {
-    logger.warn(`{Deserialize User} - Access token invalid: ${error} | '${accessToken.slice(0, 10)}...${accessToken.slice(-10)}'`);
-    res.locals.error = "Access token invalid."
-    return next();
-  }
-
   if (decoded) {
-    logger.debug(`{Deserialize User} - Session ID from decoded JWT: ${decoded.session_id} - valid: ${!expired} - url: ${req.url}`);
+    logger.debug(`{Deserialize User} - Session ID from decoded JWT: ${decoded.sessionId} - valid: ${!expired} - url: ${req.url}`);
     try {
       
       if (!expired) {
@@ -45,5 +38,9 @@ export async function deserializeUser(req: Request, res: Response, next: NextFun
       logger.error("Error processing JWT: " + (error as Error).message);
       return res.status(500).json({ error: 'Internal server error during JWT processing' });
     }
+  } else { // otherwise invalid token
+    logger.warn(`{Deserialize User} - Access token invalid: ${error} | '${accessToken.slice(0, 10)}...${accessToken.slice(-10)}'`);
+    res.locals.error = "Access token invalid."
+    return next();
   }
 }

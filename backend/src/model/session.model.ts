@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { UserDocument } from "./user.model";
 
 export type Session = {
-    user_id: UserDocument["id"];
+    userId: UserDocument["id"];
     valid: boolean;
     userAgent: string;
 
@@ -13,7 +13,7 @@ export type Session = {
 export type SessionDocument = mongoose.Document<string> & Session;
 
 const sessionSchema = new mongoose.Schema<SessionDocument>({
-    user_id: { type: mongoose.Types.ObjectId, ref: "User", required: true },
+    userId: { type: mongoose.Types.ObjectId, ref: "User", required: true },
     valid: { type: Boolean, required: true, default: true },
     userAgent: { type: String },
 },

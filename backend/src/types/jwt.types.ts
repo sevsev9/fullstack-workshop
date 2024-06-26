@@ -4,7 +4,7 @@ export type UserJwtPayload = {
     _id: string;
     username: string;
     role: ROLE;
-    session_id: string;
+    sessionId: string;
     exp?: number; // expiration date
     iat?: number; // issued at
 }

@@ -22,7 +22,7 @@ router.post('/logout', requireUser, logoutHandler);
 
 function loggedInRedirect(req: Request, res: Response, next: NextFunction) {
     if (res.locals.user) {
-        loggerUtil.debug(`Logged in user tried to go to login/signup page | sid:${res.locals.user.session_id}`);
+        loggerUtil.debug(`Logged in user tried to go to login/signup page | sid:${res.locals.user.sessionId}`);
         return res.redirect('/');
     }
 

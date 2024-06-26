@@ -1,18 +1,22 @@
 import { Request, Response } from "express";
 import { Error as MongooseError } from "mongoose";
 import type { MongoServerError } from "mongodb";
+import { pick } from "lodash";
 
 import logger from "../util/logger.util";
 
-import { LoginUserInput, RegisterUserInput } from "../schema/auth.schema";
-import { createSession, invalidateAllSessionsForUser, reIssueAccessToken } from "../service/session.service";
+import { LoginUserInput, RegisterUserInput, RefreshAccessTokenInput } from "../schema/auth.schema";
+import type {  } from "../schema/auth.schema";
+
 import { signJwt } from "../util/jwt.util";
+
+import { createSession, invalidateAllSessionsForUser, reIssueAccessToken } from "../service/session.service";
 import { createUser, validateUserCredentials } from "../service/user.service";
-import type { RefreshAccessTokenInput } from "../schema/auth.schema";
+
 import { UserJwtPayload } from "../types/jwt.types";
 import { ApplicationError, ErrorCode } from "../types/errors";
 import { CustomSchemaExpressHandler } from "./handler.type";
-import { pick } from "lodash";
+
 
 /**
  * Handles the registration of a user.
@@ -89,7 +93,7 @@ export const loginHandler: CustomSchemaExpressHandler<LoginUserInput> = async (r
         const invalidated = await invalidateAllSessionsForUser(user._id);
 
         if (invalidated > 0) {
-            logger.warn(`{Auth Controller | Login Handler} - Found valid session in the login process. Be aware for inconsistencies! - user_id="${user._id}" - Invalidating...`);
+            logger.warn(`{Auth Controller | Login Handler} - Found valid session in the login process. Be aware for inconsistencies! - userId="${user._id}" - Invalidating...`);
         }
 
         // create new session
@@ -98,7 +102,7 @@ export const loginHandler: CustomSchemaExpressHandler<LoginUserInput> = async (r
         logger.debug("{Auth Controller | Login Handler} - session created: " + session.id + "for user " + user.email);
 
         // create user info object to sign jwt with
-        const userinfo = {...pick(user, ["_id", "username", "email", "role"]), session_id: session._id};
+        const userinfo = {...pick(user, ["_id", "username", "email", "role"]), sessionId: session._id};
 
         // create new access JWT
         const access_token = signJwt( userinfo as UserJwtPayload, { expiresIn: process.env.ACCESS_TOKEN_TTL } );
@@ -133,12 +137,12 @@ export const loginHandler: CustomSchemaExpressHandler<LoginUserInput> = async (r
  * @param res Responds with a json body containing the new access token if the procedure succeeded
  */
 export const refreshAccessTokenHandler: CustomSchemaExpressHandler<RefreshAccessTokenInput> = async (req, res) => {
-    logger.debug(`{Auth Controller} - Attempting to issue new access token for refresh token: '${req.body.refresh_token.slice(0, 10)}...${req.body.refresh_token.slice(-10)}'`);
+    logger.debug(`{Auth Controller | Refresh Access Token} - Attempting to issue new access token for refresh token: '${req.body.refresh_token.slice(0, 10)}...${req.body.refresh_token.slice(-10)}'`);
 
     const at = await reIssueAccessToken(req.body.refresh_token);
 
     if (at.error) {
-        logger.warn(`{Auth Controller} - User tried to get new access token with invalid refresh token: ${at.error} | '${req.body.refresh_token.slice(0, 10)}...${req.body.refresh_token.slice(-10)}'`);
+        logger.warn(`{Auth Controller | Refresh Access Token} - User tried to get new access token with invalid refresh token: ${at.error} | '${req.body.refresh_token.slice(0, 10)}...${req.body.refresh_token.slice(-10)}'`);
 
         return res.status(401).json({ error: at.error });
     }

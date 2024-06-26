@@ -8,12 +8,12 @@ import { UserDocument } from "../model/user.model";
 
 /**
  * Creates a new session for a given user
- * @param user_id The user_id the session is for
+ * @param userId The userId the session is for
  * @param userAgent The userAgent the user is requesting a new session from
  * @returns a new session
  */
-export async function createSession(user_id: string, userAgent: string) {
-    const session = await Session.create({ user_id: user_id, userAgent });
+export async function createSession(userId: string, userAgent: string) {
+    const session = await Session.create({ userId: userId, userAgent });
     return session;
 }
 
@@ -56,20 +56,20 @@ export async function reIssueAccessToken(refreshToken: string): Promise<{ error:
     const { decoded, valid, error } = verifyJwt(refreshToken);
 
     if (!valid || !decoded) {
-        logger.warn(`{Session Service} - Refresh token verification failed: ${error}`);
+        logger.warn(`{Session Service | Re-Issue Access Token} - Refresh token verification failed: ${error}`);
         return { jwt: false, error: "Invalid refresh token" };
     }
 
     try {
-        const session = await Session.findById(decoded.session_id);
+        const session = await Session.findById(decoded.sessionId);
         if (!session || !session.valid) {
-            logger.warn(`{Session Service} - Session ${decoded.session_id} invalid or not found`);
+            logger.warn(`{Session Service | Re-Issue Access Token} - Session ${decoded.sessionId} invalid or not found`);
             return { jwt: false, error: "Invalid session" };
         }
 
-        const user = await findUserById(session.user_id);
+        const user = await findUserById(session.userId);
         if (!user) {
-            logger.warn(`{Session Service} - User ${session.user_id} not found for session ${decoded.session_id}`);
+            logger.warn(`{Session Service | Re-Issue Access Token} - User ${session.userId} not found for session ${decoded.sessionId}`);
             return { jwt: false, error: "User not found" };
         }
 
@@ -77,37 +77,37 @@ export async function reIssueAccessToken(refreshToken: string): Promise<{ error:
             _id: user._id,
             username: user.username,
             role: user.role,
-            session_id: session._id
+            sessionId: session._id
         }, { expiresIn: process.env.ACCESS_TOKEN_TTL });
 
         return { jwt: accessToken, error: "" };
 
     } catch (err) {
-        logger.error(`{Session Service} - Error in reIssuing access token: ${err}`);
+        logger.error(`{Session Service | Re-Issue Access Token} - Error in re-issuing access token: ${err}`);
         return { jwt: false, error: 'Error processing refresh token' };
     }
 }
 
 /**
  * Invalidates a session by setting its valid flag to false.
- * @param session_id The ID of the session to invalidate.
+ * @param sessionId The ID of the session to invalidate.
  */
-export async function invalidateSession(session_id: SessionDocument["_id"]): Promise<void> {
+export async function invalidateSession(sessionId: SessionDocument["_id"]): Promise<void> {
     try {
-        await SessionModel.findByIdAndUpdate(session_id, { valid: false });
-        logger.info(`{Session Service} - Session ${session_id} invalidated successfully.`);
+        await SessionModel.findByIdAndUpdate(sessionId, { valid: false });
+        logger.info(`{Session Service | Invalidate Session} - Session ${sessionId} invalidated successfully.`);
     } catch (error) {
-        logger.error(`{Session Service} - Failed to invalidate session ${session_id}: ${(error as Error).message}`);
+        logger.error(`{Session Service | Invalidate Session} - Failed to invalidate session ${sessionId}: ${(error as Error).message}`);
         throw new Error(`Failed to invalidate session: ${(error as Error).message}`);
     }
 }
 
 /**
  * Checks if a currently active session exists for a user, if that is the case, it returns the id.
- * @param user_id The ObjectId
+ * @param userId The ObjectId
  */
-export async function findSessionForUser(user_id: UserDocument["_id"]): Promise<string | undefined> {
-    const session = await SessionModel.findOne({ user_id: user_id });
+export async function findSessionForUser(userId: UserDocument["_id"]): Promise<string | undefined> {
+    const session = await SessionModel.findOne({ userId });
 
     return session?.id;
 }
@@ -115,12 +115,12 @@ export async function findSessionForUser(user_id: UserDocument["_id"]): Promise<
 
 /**
  * This function invalidates all sessions for a given user
- * @param user_id the ObjectId from the user to invalidate all sessions for
+ * @param userId the ObjectId from the user to invalidate all sessions for
  */
-export async function invalidateAllSessionsForUser(user_id: UserDocument["_id"]): Promise<number> {
-    const sessions = await SessionModel.updateMany({ user_id: user_id, valid: true }, { valid: false });
+export async function invalidateAllSessionsForUser(userId: UserDocument["_id"]): Promise<number> {
+    const sessions = await SessionModel.updateMany({ userId, valid: true }, { valid: false });
 
-    logger.info(`{Session Service} - Invalidated ${sessions.modifiedCount} session${sessions.modifiedCount > 1 ? 's': ''} for user ${user_id}.`);
+    logger.info(`{Session Service | Invalidate All Sessions For User} - Invalidated ${sessions.modifiedCount} session${sessions.modifiedCount > 1 ? 's': ''} for user ${userId}.`);
 
     return sessions.modifiedCount;
 }

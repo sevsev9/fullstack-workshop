@@ -1,5 +1,4 @@
-import { Application, Request, Response } from "express";
-import { Error as MongooseError } from "mongoose";
+import { Request, Response } from "express";
 
 import logger from "../util/logger.util";
 import { UpdateUserProfileInput } from "../schema/user.schema";
