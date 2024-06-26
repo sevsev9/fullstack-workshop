@@ -1,6 +1,5 @@
 import { createContext, useContext, useState } from "react";
 import { WSGame } from "../../../backend/src/types/ws.types";
-import { Move } from "../../../backend/src/model/game.model";
 
 type SSTContextType = {
   game?: WSGame;
@@ -17,7 +16,6 @@ const exampleGame: WSGame = {
   player_x: {
     user_id: "0",
     username: "christian",
-    points: 0,
   },
   player_o: {
     user_id: "1",

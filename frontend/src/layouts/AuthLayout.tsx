@@ -19,41 +19,35 @@ export default function AuthLayout({
 
       <div className="self-center w-full max-w-md">{children}</div>
 
-      <AuthLink
-        link={isLogin ? "/auth/register" : "/auth/login"}
-        linkText={
-          isLogin
-            ? "You don't have an account yet?"
-            : "You already have an account?"
-        }
-        span={isLogin ? "Sign up" : "Login"}
-      />
+      {isLogin ? <RegisterLink /> : <LoginLink />}
     </div>
   );
 }
 
-const AuthLink = (props: { link: string; linkText: string; span: string }) => {
+const LoginLink = () => {
   return (
-    <Link href={props.link} className="text-center">
-      {props.linkText} <span className="font-bold underline">{props.span}</span>
-    </Link>
+    <AuthLink
+      link={"/auth/login"}
+      linkText={"You already have an account?"}
+      span={"Login"}
+    />
   );
 };
 
 const RegisterLink = () => {
   return (
-    <Link href="/auth/register" className="text-center">
-      You don't have an account yet?{" "}
-      <span className="font-bold underline">Sign up</span>
-    </Link>
+    <AuthLink
+      link={"/auth/register"}
+      linkText={"You don't have an account yet?"}
+      span={"Sign up"}
+    />
   );
 };
 
-const LoginLink = () => {
+const AuthLink = (props: { link: string; linkText: string; span: string }) => {
   return (
-    <Link href="/auth/login" className="text-center">
-      You already have an account?{" "}
-      <span className="font-bold underline">Login</span>
+    <Link href={props.link} className="text-center">
+      {props.linkText} <span className="font-bold underline">{props.span}</span>
     </Link>
   );
 };

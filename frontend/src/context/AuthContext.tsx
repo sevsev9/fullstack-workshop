@@ -33,7 +33,7 @@ export default function AuthProvider({
         router.push(LOGIN_PAGE).then(() => setLoading(false));
       }
     });
-  }, []);
+  }, []); /* eslint-disable-line */
 
   const me = async () => {
     const result = await userService.getProfile();

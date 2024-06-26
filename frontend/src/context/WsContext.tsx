@@ -77,7 +77,7 @@ export default function WsProvider({
     return () => {
       ws.close();
     };
-  }, []);
+  }, []); /* eslint-disable-line */
 
   const sendWsMessage = (request: Request) => {
     if (socket && isOpen) {
