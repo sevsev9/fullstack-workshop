@@ -1,22 +1,24 @@
 # SuperTicTacToe Backend
 
+
+## Configuring the Service
+
+### Environment Variables
+
+| Variable          | Description                                                         | Default | Required |
+| ----------------- | ------------------------------------------------------------------- | ------- | -------- |
+| PORT              | The port the backend will listen on                                 | 8080    | No       |
+| DB_URL            | The MongoDB Connection URL                                          | -       | Yes      |
+| SALT_WORK_FACTOR  | The amount of password salt rounds                                  | -       | Yes      |
+| ACCESS_TOKEN_TTL  | The lifetime of the issued access tokens                            | -       | Yes      |
+| REFRESH_TOKEN_TTL | The lifetime of the issued refresh tokens                           | -       | Yes      |
+| PRIVATE_KEY_FILE  | The location of the file containing the private key to use for JWTs | -       | Yes      |
+| PUBLIC_KEY_FILE   | The location of the file containing the public key to use for JWTs  | -       | Yes      |
+| RUN_ENV           | The run environment the backend should consider itself as           | DEV     | No       |
+| LOG_LEVEL         | The general log level of the API                                    | info    | No       |
+
+
 ## Game Modes
-
-### Example
-x = 1
-o = 0
-
-| - | - | - ||| - | x | - ||| - | o | - |
-| - | o | - ||| - | x | o ||| - | x | - |
-| - | - | o ||| - | o | - ||| - | - | - |
------------------------------------------
-| - | - | - ||| x | o | x ||| x | - | - |
-| - | x | - ||| o | x | o ||| - | x | - |
-| - | - | - ||| o | o | x ||| - | - | x |
------------------------------------------
-| - | x | - ||| - | - | - ||| - | - | o |
-| - | o | - ||| - | o | - ||| - | o | - |
-| - | - | - ||| x | x | - ||| - | - | x |
 
 ### Gameplay Options
 
