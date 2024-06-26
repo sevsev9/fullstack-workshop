@@ -1,27 +1,35 @@
 # htlw-workshop-S24
 This repository contains the the resources for the S24 workshop at the HTL-Wels
 
+## Agenda
 
-## Backend Project Setup
+1. Introduction
+2. Workshop Goal
+3. Technologies Involved
+    - From Bare-Metal to Frontend Libraries
+    - Server
+    - Ubuntu Server Running in VMs
+    - VMs have Public IPs
+    - Domains have A entries to these VMs Public IPs
+    - Docker
+    - Docker Images
+    - Traefik
+    - ...
+4. Project Setup (VSCode + Plugins + npm install)
+    - Error Lens
+    - DotEnv
+    - Prettier
+    - Pretty TypeScript errors
+    - ESLint
+5. Typescript
+6. Backend
+    - introductions
+    - project setup
+        - npm init
+        - install packages
+        - create folders
+        - download files 
 
-### Install Dependencies
 
-**Packages**:
 
-- bcrypt | crypto library for password hashing
-- cors | CORS plugin for expres
-- dayjs | timestamp formatting for pino
-- dotenv | reading env variables
-- express | rest framework
-- jsonwebtoken | handles processing of jwts
-- mongoose | mongodb orm
-- pino | logging utility
-- pino-pretty | Pretty print the logs
-- zod | schema parsing
-
-**Development Packages**:
-
-- `@types/*` | types for packages that are not native to typescript
-- ts-node | run typescript node
-- ts-node-dev | hot reload for ts-node
-- typescript | typescript
+![htl overview](./htl-overview-s24.png)
