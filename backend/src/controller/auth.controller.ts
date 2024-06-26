@@ -20,9 +20,9 @@ import { pick } from "lodash";
 export const registerHandler: CustomSchemaExpressHandler<RegisterUserInput> = async (req, res) => {
     const { email, username, password } = req.body;
 
-    logger.info(`{Auth Controller} - register user body: ${JSON.stringify(req.body)}`);
+    logger.debug(`{Auth Controller | Register Handler} - register user body: ${JSON.stringify(req.body)}`);
 
-    logger.info(`{Auth Controller} - Creating User with email ${email}`);
+    logger.info(`{Auth Controller | Register Handler} - Creating User with email ${email}`);
 
     try {
         await createUser(email, username, password);
@@ -31,7 +31,7 @@ export const registerHandler: CustomSchemaExpressHandler<RegisterUserInput> = as
             const msr = e as MongoServerError;
 
             if (msr.code === 11000) {
-                logger.warn(`{Auth Controller} - Error creating user with email ${email} | ${msr.error}`);
+                logger.warn(`{Auth Controller | Register Handler} - Error creating user with email ${email} | ${msr.error}`);
 
                 let field = Object.keys(msr.keyValue)[0];
                 return res.status(409).json({
@@ -42,7 +42,7 @@ export const registerHandler: CustomSchemaExpressHandler<RegisterUserInput> = as
             }
         } else if ((e as Error).name === "ValidationError") {
             const err = e as MongooseError.ValidationError;
-            logger.warn(`{Auth Controller} - Error creating user with email ${email} | ${err.message}`);
+            logger.warn(`{Auth Controller | Register Handler} - Error creating user with email ${email} | ${err.message}`);
 
             return res.status(400).json({
                 message: err.message,
@@ -56,14 +56,14 @@ export const registerHandler: CustomSchemaExpressHandler<RegisterUserInput> = as
             });
         }
 
-        logger.error(`{Auth Controller} - An unexpected error occurred: [${(e as Error).name}]:${(e as Error).message}`);
+        logger.error(`{Auth Controller | Register Handler} - An unexpected error occurred: [${(e as Error).name}]:${(e as Error).message}`);
 
         return res.status(500).json({
             error: (e as Error).message
         })
     }
 
-    logger.info(`{Auth Controller} - Successfully created new user with email ${email}.`);
+    logger.info(`{Auth Controller | Register Handler} - Successfully created new user with email ${email}.`);
 
     // @roadmap email verification would come here
 
@@ -79,23 +79,23 @@ export const registerHandler: CustomSchemaExpressHandler<RegisterUserInput> = as
  */
 export const loginHandler: CustomSchemaExpressHandler<LoginUserInput> = async (req, res) => {
     try {
-        logger.debug(`{Login Handler} - Validating credentials for user ${req.body.email}...`);
+        logger.debug(`{Login Handler | Login Handler} - Validating credentials for user ${req.body.email}...`);
 
         const user = await validateUserCredentials(req.body.email, req.body.password);
 
-        logger.debug(`{Login Handler} - User ${user.email}(_id: ${user._id}) successfully validated. Creating session...`);
+        logger.debug(`{Login Handler | Login Handler}} - User ${user.email}(_id: ${user._id}) successfully validated. Creating session...`);
 
         // check if a session is currently active (should not be - just for consistency)
         const invalidated = await invalidateAllSessionsForUser(user._id);
 
         if (invalidated > 0) {
-            logger.warn(`{Auth Controller} - Found valid session in the login process. Be aware for inconsistencies! - user_id="${user._id}" - Invalidating...`);
+            logger.warn(`{Auth Controller | Login Handler}} - Found valid session in the login process. Be aware for inconsistencies! - user_id="${user._id}" - Invalidating...`);
         }
 
         // create new session
         const session = await createSession(user._id, req.headers['user-agent'] ?? "not defined");
 
-        logger.debug("{Auth Controller} - session created: " + session.id + "for user " + user.email);
+        logger.debug("{Auth Controller | Login Handler}} - session created: " + session.id + "for user " + user.email);
 
         // create user info object to sign jwt with
         const userinfo = {...pick(user, ["_id", "username", "email", "role"]), session_id: session._id};
@@ -116,12 +116,12 @@ export const loginHandler: CustomSchemaExpressHandler<LoginUserInput> = async (r
             const err = e as ApplicationError;
 
             if (err.errorCode === ErrorCode.USER_NOT_FOUND) {
-                logger.warn(`{Auth Controller} - User ${req.body.email} not found.`);
+                logger.warn(`{Auth Controller | Login Handler}} - User ${req.body.email} not found.`);
                 return res.status(404).json({ message: err.message });
             }
         }
 
-        logger.warn(`{Auth Controller} - Error while logging in user ${req.body.email}: [${(e as Error).name}]: ${(e as Error).message}`);
+        logger.warn(`{Auth Controller | Login Handler}} - Error while logging in user ${req.body.email}: [${(e as Error).name}]: ${(e as Error).message}`);
         res.status(401).json({ message: (e as Error).message });
     }
 }
@@ -133,12 +133,12 @@ export const loginHandler: CustomSchemaExpressHandler<LoginUserInput> = async (r
  * @param res Responds with a json body containing the new access token if the procedure succeeded
  */
 export const refreshAccessTokenHandler: CustomSchemaExpressHandler<RefreshAccessTokenInput> = async (req, res) => {
-    logger.debug(`{Auth Controller} - Attempting to issue new access token for refresh token: ${req.body.refresh_token}`);
+    logger.debug(`{Auth Controller} - Attempting to issue new access token for refresh token: '${req.body.refresh_token.slice(0, 10)}...${req.body.refresh_token.slice(-10)}'`);
 
     const at = await reIssueAccessToken(req.body.refresh_token);
 
     if (at.error) {
-        logger.warn(`{Auth Controller} - User tried to get new access token with invalid refresh token: ${at.error} | '${req.body.refresh_token}'`);
+        logger.warn(`{Auth Controller} - User tried to get new access token with invalid refresh token: ${at.error} | '${req.body.refresh_token.slice(0, 10)}...${req.body.refresh_token.slice(-10)}'`);
 
         return res.status(401).json({ error: at.error });
     }
