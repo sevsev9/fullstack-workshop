@@ -68,6 +68,14 @@ export async function updateTodo(
     logger.info(`{Todo Service | Update Todo} - Updating todo with id: ${todoId} for user: ${userId}`);
 
     try {
+        // check if a date is being updated
+        if (updates.dueDate) {
+            // check if the due date is in the past
+            if (new Date(updates.dueDate) < new Date()) {
+                throw new ApplicationError(`Due date cannot be in the past`, ErrorCode.INVALID_INPUT);
+            }
+        }
+
         const todo = await TodoModel.findById(todoId).exec();
 
         if (!todo) {

@@ -1,6 +1,5 @@
-import { Request, Response, NextFunction, Router } from "express";
+import { Router } from "express";
 
-import loggerUtil from "../util/logger.util";
 import validate from "../middleware/validateResource";
 import requireUser from "../middleware/requireUser";
 
