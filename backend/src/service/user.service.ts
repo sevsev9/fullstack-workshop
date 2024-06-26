@@ -20,11 +20,13 @@ export type UpdatedFields = {
 export async function findUserById(_id: string) {
   let user = await UserModel.findById(_id, { password: false, __v: false, createdAt: false, updatedAt: false }, { lean: true });
 
-  logger.info(`{USER SERVICE} - Found user ${_id}: ${user?.email}`);
+  if (!user) {
+    throw new ApplicationError(`User with id ${_id} not found`, ErrorCode.USER_NOT_FOUND);
+  }
 
-  if (user !== null) {
-    return user;
-  } else throw "User not found."
+  logger.info(`{USER SERVICE} - Found user ${_id}: ${user?.email}`);
+  
+  return user;
 }
 
 /**
@@ -74,7 +76,7 @@ export async function validateUserCredentials(email: string, password: string) {
   const user = await UserModel.findOne({ email }, { __v: false }).exec();
 
   console.log(user);
-  
+
   if (!user) {
     throw new ApplicationError(`User with email "${email}" not found`, ErrorCode.USER_NOT_FOUND);
   }
