@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import logger from "../util/logger.util";
 import { UpdateUserProfileInput } from "../schema/user.schema";
 import { UpdatedFields, findUserById, updateUser } from "../service/user.service";
-import { CustomSchemaExpressHandler } from "./handler.type";
+import { CustomSchemaExpressHandler } from "../types/handler.types";
 import { ApplicationError } from "../types/errors";
 
 export async function getUserProfileHandler(

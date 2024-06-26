@@ -1,15 +1,13 @@
 import { Request, Response } from "express";
 import { Error as MongooseError } from "mongoose";
-import type { MongoServerError } from "mongodb";
-import { pick } from "lodash";
 
 import logger from "../util/logger.util";
 
 import { CreateTodoInput, UpdateTodoInput, DeleteTodoInput } from "../schema/todo.schema";
 import { getTodosForUser, createTodo, deleteTodo, updateTodo } from "../service/todo.service";
 
-import { ApplicationError, ErrorCode } from "../types/errors";
-import { CustomSchemaExpressHandler } from "./handler.type";
+import { ApplicationError } from "../types/errors";
+import { CustomSchemaExpressHandler } from "../types/handler.types";
 
 export const getTodosHandler = async (req: Request, res: Response) => {
     const uid = res.locals.user._id;

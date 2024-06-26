@@ -96,15 +96,23 @@ export const connectionHandler =
                 case "lobby_leave":
                 case "lobby_chat":
                 case "game_move":
-                    // sending such messages requires auth
+                    if (!ws.user) {
+                        ws.send(
+                            JSON.stringify({
+                                type: "error",
+                                payload: { error: "Not authenticated" },
+                            }),
+                        );
+                        return;
+                    }
                     break;
             }
 
             // handle the messages
             switch (parsedMessage.type) {
-                case "global_chat":
-                    handleGlobalChat(wss, ws, parsedMessage);
-                    break;
+                // case "global_chat":
+                //     handleGlobalChat(wss, ws, parsedMessage);
+                //     break;
                 case "lobby_create":
                     handleLobbyCreate(ws, parsedMessage);
                     break;
@@ -114,9 +122,9 @@ export const connectionHandler =
                 case "lobby_leave":
                     handleLobbyLeave(ws, parsedMessage);
                     break;
-                case "lobby_chat":
-                    handleLobbyChat(ws, parsedMessage);
-                    break;
+                // case "lobby_chat":
+                //     handleLobbyChat(ws, parsedMessage);
+                //     break;
                 case "game_move":
                     handleGameMove(ws, parsedMessage);
                     break;
@@ -159,11 +167,7 @@ export const connectionHandler =
                     },
                 };
 
-                lobby.players.forEach((wpi) => {
-                    if (wpi.socket.readyState === WebSocket.OPEN) {
-                        wpi.socket.send(JSON.stringify(gameStateMessage));
-                    }
-                });
+                broadcastLobbyList();
             }
         });
     };
@@ -233,7 +237,7 @@ function handleLobbyCreate(ws: WebSocketWithAuth, message: LobbyCreateRequest) {
         created: new Date(),
         players: [
             {
-                user_id: ws.user._id,
+                userId: ws.user._id,
                 username: ws.user.username,
                 socket: ws,
             } as WSPlayerInfo,
@@ -264,7 +268,7 @@ function handleLobbyJoin(ws: WebSocketWithAuth, message: LobbyJoinRequest) {
     }
 
     lobby.players.push({
-        user_id: ws.user._id,
+        userId: ws.user._id,
         username: ws.user.username,
         socket: ws,
     } as WSPlayerInfo);

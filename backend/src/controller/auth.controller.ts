@@ -15,7 +15,7 @@ import { createUser, validateUserCredentials } from "../service/user.service";
 
 import { UserJwtPayload } from "../types/jwt.types";
 import { ApplicationError, ErrorCode } from "../types/errors";
-import { CustomSchemaExpressHandler } from "./handler.type";
+import { CustomSchemaExpressHandler } from "../types/handler.types";
 
 
 /**
