@@ -83,19 +83,19 @@ export const loginHandler: CustomSchemaExpressHandler<LoginUserInput> = async (r
 
         const user = await validateUserCredentials(req.body.email, req.body.password);
 
-        logger.debug(`{Login Handler | Login Handler}} - User ${user.email}(_id: ${user._id}) successfully validated. Creating session...`);
+        logger.debug(`{Login Handler | Login Handler} - User ${user.email}(_id: ${user._id}) successfully validated. Creating session...`);
 
         // check if a session is currently active (should not be - just for consistency)
         const invalidated = await invalidateAllSessionsForUser(user._id);
 
         if (invalidated > 0) {
-            logger.warn(`{Auth Controller | Login Handler}} - Found valid session in the login process. Be aware for inconsistencies! - user_id="${user._id}" - Invalidating...`);
+            logger.warn(`{Auth Controller | Login Handler} - Found valid session in the login process. Be aware for inconsistencies! - user_id="${user._id}" - Invalidating...`);
         }
 
         // create new session
         const session = await createSession(user._id, req.headers['user-agent'] ?? "not defined");
 
-        logger.debug("{Auth Controller | Login Handler}} - session created: " + session.id + "for user " + user.email);
+        logger.debug("{Auth Controller | Login Handler} - session created: " + session.id + "for user " + user.email);
 
         // create user info object to sign jwt with
         const userinfo = {...pick(user, ["_id", "username", "email", "role"]), session_id: session._id};
@@ -116,12 +116,12 @@ export const loginHandler: CustomSchemaExpressHandler<LoginUserInput> = async (r
             const err = e as ApplicationError;
 
             if (err.errorCode === ErrorCode.USER_NOT_FOUND) {
-                logger.warn(`{Auth Controller | Login Handler}} - User ${req.body.email} not found.`);
+                logger.warn(`{Auth Controller | Login Handler} - User ${req.body.email} not found.`);
                 return res.status(404).json({ message: err.message });
             }
         }
 
-        logger.warn(`{Auth Controller | Login Handler}} - Error while logging in user ${req.body.email}: [${(e as Error).name}]: ${(e as Error).message}`);
+        logger.warn(`{Auth Controller | Login Handler} - Error while logging in user ${req.body.email}: [${(e as Error).name}]: ${(e as Error).message}`);
         res.status(401).json({ message: (e as Error).message });
     }
 }

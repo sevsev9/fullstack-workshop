@@ -22,13 +22,13 @@ export async function deserializeUser(req: Request, res: Response, next: NextFun
 
   // if the token is invalid
   if (!valid) {
-    logger.warn(`Access token invalid: ${error} | '${accessToken}'`);
+    logger.warn(`{Deserialize User} - Access token invalid: ${error} | '${accessToken.slice(0, 10)}...${accessToken.slice(-10)}'`);
     res.locals.error = "Access token invalid."
     return next();
   }
 
   if (decoded) {
-    logger.debug(`{Deserialize User} - Session ID from decoded JWT: ${decoded.sessionId} - valid: ${!expired} - url: ${req.url}`);
+    logger.debug(`{Deserialize User} - Session ID from decoded JWT: ${decoded.session_id} - valid: ${!expired} - url: ${req.url}`);
     try {
       
       if (!expired) {
