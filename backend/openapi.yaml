@@ -14,6 +14,8 @@ tags:
     description: Endpoints for user authentication
   - name: User
     description: Endpoints for user profile management
+  - name: Todo
+    description: Endpoints for todo management
   - name: Admin
     description: Endpoints for admin users
 
@@ -37,6 +39,21 @@ components:
           description: will always be lowercased
         username:
           type: string
+    Todo:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        dueDate:
+          type: string
+          format: date
+          nullable: true
+        completed:
+          type: boolean
+        archived:
+          type: boolean
     Error:
       type: object
       properties:
@@ -48,6 +65,8 @@ components:
 paths:
   /auth/register:
     post:
+      tags:
+        - Authentication
       summary: Registers a new user
       requestBody:
         required: true
@@ -99,6 +118,8 @@ paths:
 
   /auth/login:
     post:
+      tags:
+        - Authentication
       summary: Authenticates a user and returns a JWT
       requestBody:
         required: true
@@ -144,6 +165,8 @@ paths:
 
   /auth/refresh:
     post:
+      tags:
+        - Authentication
       summary: Refreshes the JWT
       requestBody:
         required: true
@@ -200,6 +223,8 @@ paths:
 
   /user/profile:
     get:
+      tags:
+        - User
       summary: Retrieves the logged-in user's profile
       security:
         - bearerAuth: []
@@ -214,6 +239,8 @@ paths:
           description: Unauthorized
 
     put:
+      tags:
+        - User
       summary: Updates the logged-in user's profile
       security:
         - bearerAuth: []
@@ -252,6 +279,119 @@ paths:
                     nullable: true
         204:
           description: No update
+        400:
+          description: Invalid request
+        401:
+          description: Unauthorized
+
+  /user/todo:
+    get:
+      tags:
+        - Todo
+      summary: Retrieves all todos for the logged-in user
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Todos retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Todo"
+        401:
+          description: Unauthorized
+    post:
+      tags:
+        - Todo
+      summary: Creates a new todo for the logged-in user
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "Buy milk"
+                dueDate:
+                  type: string
+                  format: date
+                  nullable: true
+      responses:
+        201:
+          description: Todo created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Todo"
+        400:
+          description: Invalid request
+        401:
+          description: Unauthorized
+    put:
+      tags:
+        - Todo
+      summary: Updates a todo for the logged-in user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "Buy milk"
+                  nullable: true
+                dueDate:
+                  type: string
+                  format: date
+                  nullable: true
+                completed:
+                  type: boolean
+                  nullable: true
+                archived:
+                  type: boolean
+                  nullable: true
+      responses:
+        200:
+          description: Todo updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Todo"
+        400:
+          description: Invalid request
+        401:
+          description: Unauthorized
+    delete:
+      tags:
+        - Todo
+      summary: Deletes a todo for the logged-in user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Todo deleted
         400:
           description: Invalid request
         401:
