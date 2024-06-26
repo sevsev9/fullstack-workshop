@@ -1,7 +1,7 @@
 import { Move } from "../model/move.model";
 import { UserDocument } from "../model/user.model";
 import WebSocket from "ws";
-import { UserJwtPayload, VerifyJwtResult } from "./jwt.types";
+import { UserJwtPayload } from "./jwt.types";
 
 export type WSPlayerInfo = {
     userId: UserDocument["_id"],
