@@ -46,6 +46,8 @@ export default function WsProvider({
             router.push(LOGIN_PAGE);
           case "lobby_list":
             console.log(response.payload.lobbies);
+          case "lobby_create":
+            console.log(response.payload);
           default:
             toast("unknown event response");
         }
@@ -75,6 +77,7 @@ export default function WsProvider({
   }, []);
 
   const sendWsMessage = (request: Request) => {
+    console.log(isOpen, socket);
     if (socket && isOpen) {
       socket.send(JSON.stringify(request));
     } else {

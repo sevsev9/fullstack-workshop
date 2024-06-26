@@ -40,6 +40,8 @@ export default function Home() {
       },
     };
 
+    console.log(createMessage);
+
     sendWsMessage(createMessage);
   };
 

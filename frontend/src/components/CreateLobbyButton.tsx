@@ -20,6 +20,7 @@ export default function CreateLobbyButton({ onSubmit }: Props) {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log(lobbyName);
 
     if (!lobbyName.trim()) {
       toast("Enter a name in order to create new lobby");
@@ -47,8 +48,8 @@ export default function CreateLobbyButton({ onSubmit }: Props) {
             value={lobbyName}
             onChange={(e) => setLobbyName(e.target.value)}
           />
+          <Button type="submit">Create Lobby</Button>
         </form>
-        <Button type="submit">Create Lobby</Button>
       </DialogContent>
     </Dialog>
   );
