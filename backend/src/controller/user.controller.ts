@@ -1,9 +1,11 @@
-import { Request, Response } from "express";
+import { Application, Request, Response } from "express";
+import { Error as MongooseError } from "mongoose";
 
 import logger from "../util/logger.util";
 import { UpdateUserProfileInput } from "../schema/user.schema";
 import { UpdatedFields, findUserById, updateUser } from "../service/user.service";
 import { CustomSchemaExpressHandler } from "./handler.type";
+import { ApplicationError } from "../types/errors";
 
 export async function getUserProfileHandler(
     _: Request,
@@ -16,9 +18,23 @@ export async function getUserProfileHandler(
 
         return res.status(200).json(user);
     } catch (e) {
-        logger.warn(`Error ${(e as Error).name}: ${(e as Error).message}`);
+        logger.debug(`{User Controller | Get User Profile Handler} - Error: ${e}`);
 
-        return res.status(400).json(e);
+        if ((e as Error).name === "ApplicationError") {
+            const err = e as ApplicationError;
+
+            logger.error(`{User Controller | Get User Profile Handler} - Error ${err.errorCode}: ${err.message}`);
+            return res.status(400).json([
+                {
+                    message: err.message,
+                    errorCode: err.errorCode
+                }
+            ]);
+        }
+
+        return res.status(400).json({
+            message: "An unexpected error occurred",
+        });
     }
 
 }
