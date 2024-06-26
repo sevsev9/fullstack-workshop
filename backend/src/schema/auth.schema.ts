@@ -1,4 +1,4 @@
-import {literal, number, object, string, TypeOf} from 'zod';
+import {object, string, TypeOf} from 'zod';
 
 export const passwordSchema = string({
     required_error: "Password missing"

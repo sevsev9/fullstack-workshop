@@ -1,5 +1,4 @@
-import { ROLE, User } from "../model/user.model";
-import UserModel from "../model/user.model";
+import UserModel, { ROLE, User } from "../model/user.model";
 import { ApplicationError, ErrorCode } from "../types/errors";
 import logger from "../util/logger.util";
 import bcrypt from "bcrypt";
@@ -113,8 +112,6 @@ export async function updateUser(user_id: string, updateData: Partial<User>): Pr
     if (!updatedUser) {
       throw new ApplicationError(`User with id ${user_id} not found`, ErrorCode.USER_NOT_FOUND);
     }
-
-    // prepare the return object
 
     return {
       username: updateData.username ?? undefined,
