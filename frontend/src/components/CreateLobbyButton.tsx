@@ -20,7 +20,6 @@ export default function CreateLobbyButton({ onSubmit }: Props) {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(lobbyName);
 
     if (!lobbyName.trim()) {
       toast("Enter a name in order to create new lobby");

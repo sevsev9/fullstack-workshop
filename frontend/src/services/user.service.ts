@@ -10,14 +10,12 @@ export type UpdateUserProps = {
 export const getProfile = async () => {
   return await apiGet<User>({
     endpoint: "/user/profile",
-    authRequired: true,
   });
 };
 
 export const updateProfile = async (props: UpdateUserProps) => {
-  return await apiPut<UpdateUserProps, User>({
+  return await apiPut<UpdateUserProps, Partial<User>>({
     endpoint: "/user/profile",
-    authRequired: true,
     body: props,
   });
 };

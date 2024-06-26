@@ -1,10 +1,14 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
-import type { User } from "../../../backend/src/model/user.model";
 import { ACCESS_TOKEN_KEY, getLocalStorageItem } from "@/utils/localstorage";
-import { Response, WSLobby, Request } from "@/types/ws.types";
 import { useRouter } from "next/router";
 import { LOGIN_PAGE } from "@/utils/pages";
+import type { User } from "../../../backend/src/model/user.model";
+import {
+  WSLobby,
+  Request,
+  Response,
+} from "../../../backend/src/types/ws.types";
 
 type WsContextType = {
   lobbies: WSLobby[];
@@ -36,7 +40,6 @@ export default function WsProvider({
     );
 
     ws.onmessage = (message) => {
-      console.log({ reponse: message });
       try {
         const response = JSON.parse(message.data) as Response;
 
@@ -77,7 +80,6 @@ export default function WsProvider({
   }, []);
 
   const sendWsMessage = (request: Request) => {
-    console.log(isOpen, socket);
     if (socket && isOpen) {
       socket.send(JSON.stringify(request));
     } else {

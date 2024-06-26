@@ -25,7 +25,6 @@ function useRegisterForm() {
 
     register({ username, email, password })
       .then((res) => {
-        console.log(res);
         toast("Account created successfully, you can sign in now");
         router.push(LOGIN_PAGE);
         // TODO

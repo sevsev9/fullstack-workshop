@@ -44,6 +44,5 @@ export const refreshToken = async (props: RefreshTokenProps) => {
 export const logout = async () => {
   return await apiPost({
     endpoint: "/auth/logout",
-    authRequired: true,
   });
 };

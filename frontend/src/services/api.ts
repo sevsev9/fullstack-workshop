@@ -5,7 +5,7 @@ import {
   getLocalStorageItem,
   setLocalStorageItem,
 } from "@/utils/localstorage";
-import { ServiceResult } from "@/types/service.types";
+import { PutServiceResult, ServiceResult } from "@/types/service.types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -28,15 +28,18 @@ const refreshToken = async () => {
       throw new Error("No refresh token available");
     }
 
-    const response = await axios.post("/refresh_token", {
-      refreshToken,
-    });
+    const response = await axios.post(
+      "http://localhost:8080/api/auth/refresh",
+      {
+        refresh_token: refreshToken,
+      },
+    );
 
     if (response.status === 200) {
-      const { accessToken, refreshToken } = response.data;
-      setLocalStorageItem(ACCESS_TOKEN_KEY, accessToken);
-      setLocalStorageItem(REFRESH_TOKEN_KEY, refreshToken);
-      return accessToken;
+      const { access_token, refresh_token } = response.data;
+      setLocalStorageItem(ACCESS_TOKEN_KEY, access_token);
+      setLocalStorageItem(REFRESH_TOKEN_KEY, refresh_token);
+      return access_token;
     } else {
       throw new Error("Failed to refresh token");
     }
@@ -114,14 +117,12 @@ axiosInstance.interceptors.response.use(
 
 // Type for API request options
 type ApiRequestOptions = {
-  authRequired?: boolean;
   headers?: Record<string, string>;
 };
 
 // Function to make GET request
 export const apiGet = async <Out>({
   endpoint,
-  authRequired = false,
   headers = {},
 }: ApiRequestOptions & { endpoint: string }): Promise<ServiceResult<Out>> => {
   try {
@@ -147,7 +148,6 @@ export const apiGet = async <Out>({
 export const apiPost = async <Body, Out>({
   endpoint,
   body,
-  authRequired = false,
   headers = {},
 }: ApiRequestOptions & { endpoint: string; body?: Body }): Promise<
   ServiceResult<Out>
@@ -175,10 +175,9 @@ export const apiPost = async <Body, Out>({
 export const apiPut = async <Body, Out>({
   endpoint,
   body,
-  authRequired = false,
   headers = {},
 }: ApiRequestOptions & { endpoint: string; body?: Body }): Promise<
-  ServiceResult<Out>
+  PutServiceResult<Out>
 > => {
   try {
     const response = await axiosInstance.put(endpoint, body, {

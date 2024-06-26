@@ -10,6 +10,8 @@ import {
   removeLocalStorageItem,
   setLocalStorageItem,
 } from "@/utils/localstorage";
+import { useRouter } from "next/router";
+import { LOGIN_PAGE } from "@/utils/pages";
 
 type AuthContextType = {
   user?: User;
@@ -29,11 +31,17 @@ export default function AuthProvider({
 }) {
   const [user, setUser] = useState<User>();
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    me()
-      .then((user) => setUser(user))
-      .finally(() => setLoading(false));
+    me().then((user) => {
+      if (user) {
+        setUser(user);
+        setLoading(false);
+      } else {
+        router.push(LOGIN_PAGE).then(() => setLoading(false));
+      }
+    });
   }, []);
 
   const me = async () => {
@@ -49,25 +57,6 @@ export default function AuthProvider({
       setUser(result.data.user);
       setLocalStorageItem(ACCESS_TOKEN_KEY, result.data.access_token);
       setLocalStorageItem(REFRESH_TOKEN_KEY, result.data.refresh_token);
-    }
-  };
-
-  const logout = async () => {
-    const result = await authService.logout();
-    if (!result.success) {
-      toast(result.message);
-    } else {
-      setUser(undefined);
-
-      removeLocalStorageItem(ACCESS_TOKEN_KEY);
-      removeLocalStorageItem(REFRESH_TOKEN_KEY);
-    }
-  };
-
-  const register = async (params: RegisterProps) => {
-    const result = await authService.register(params);
-    if (!result.success) {
-      toast(result.message);
     }
   };
 
