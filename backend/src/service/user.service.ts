@@ -24,8 +24,8 @@ export async function findUserById(_id: string) {
     throw new ApplicationError(`User with id ${_id} not found`, ErrorCode.USER_NOT_FOUND);
   }
 
-  logger.info(`{USER SERVICE} - Found user ${_id}: ${user?.email}`);
-  
+  logger.info(`{User Service | Find User By Id} - Found user ${_id}: ${user?.email}`);
+
   return user;
 }
 
@@ -44,7 +44,7 @@ export async function createUser(
 ): Promise<void> {
   const saltRounds = parseInt(process.env.SALT_WORK_FACTOR ?? "10");
 
-  logger.info(`{User Service} - Creating new user with email: ${email} and full name: ${username} - Hashing password with salt ${saltRounds} rounds...`);
+  logger.info(`{User Service | Create User} - Creating new user with email: ${email} and full name: ${username} - Hashing password with salt ${saltRounds} rounds...`);
 
   const hashedPassword = await bcrypt.hash(password, saltRounds);
 
@@ -56,7 +56,7 @@ export async function createUser(
   });
 
   await newUser.save();
-  logger.info(`{User Service} - Successfully created new user: ${newUser._id}`);
+  logger.info(`{User Service | Create User} - Successfully created new user: ${newUser._id}`);
 }
 
 /**
@@ -71,7 +71,7 @@ export async function createUser(
  * @throws If the user has an invalid password
  */
 export async function validateUserCredentials(email: string, password: string) {
-  logger.info(`{User Service} - Validating credentials for user with email "${email}"...`);
+  logger.info(`{User Service | Validate User Credentials} - Validating credentials for user with email "${email}"...`);
 
   const user = await UserModel.findOne({ email }, { __v: false }).exec();
 
@@ -126,11 +126,11 @@ export async function updateUser(user_id: string, updateData: Partial<User>): Pr
 
     // check if the error is a mongoose validation error
     if (err.name === "ValidationError") {
-      logger.error(`{User Service} - Update for user ${user_id} failed: ${err.message}`);
+      logger.error(`{User Service | Update User} - Update for user ${user_id} failed: ${err.message}`);
       throw new ApplicationError(err.message, ErrorCode.VALIDATION_ERROR);
     }
 
-    logger.error(`{User Service} - Update for user ${user_id} failed: ${e}`);
+    logger.error(`{User Service | Update User} - Update for user ${user_id} failed: ${e}`);
 
     throw e;
   }
