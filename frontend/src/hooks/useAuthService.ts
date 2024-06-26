@@ -2,7 +2,12 @@ import { toast } from "sonner";
 import { useUserContext } from "@/context/AuthContext";
 import * as authService from "@/services/auth.service";
 import type { LoginProps, RegisterProps } from "@/services/auth.service";
-import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "@/utils/localstorage";
+import {
+  ACCESS_TOKEN_KEY,
+  REFRESH_TOKEN_KEY,
+  removeLocalStorageItem,
+  setLocalStorageItem,
+} from "@/utils/localstorage";
 import { useRouter } from "next/router";
 
 export default function useAuthService() {
@@ -15,8 +20,8 @@ export default function useAuthService() {
       toast(result.message);
     } else {
       setUser(result.data.user);
-      localStorage.setItem(ACCESS_TOKEN_KEY, result.data.access_token);
-      localStorage.setItem(REFRESH_TOKEN_KEY, result.data.refresh_token);
+      setLocalStorageItem(ACCESS_TOKEN_KEY, result.data.access_token);
+      setLocalStorageItem(REFRESH_TOKEN_KEY, result.data.refresh_token);
       router.push("/");
     }
   };
@@ -28,8 +33,8 @@ export default function useAuthService() {
     } else {
       setUser(undefined);
       router.push("/");
-      localStorage.removeItem(ACCESS_TOKEN_KEY);
-      localStorage.removeItem(REFRESH_TOKEN_KEY);
+      removeLocalStorageItem(ACCESS_TOKEN_KEY);
+      removeLocalStorageItem(REFRESH_TOKEN_KEY);
     }
   };
 

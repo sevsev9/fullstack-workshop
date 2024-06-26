@@ -251,6 +251,7 @@ export type Response =
   | LobbyJoinResponse
   | LobbyLeaveResponse
   | LobbyKickResponse
+  | LobbyListResponse
   | LobbyKickedResponse
   | LobbyChatResponse
   | GameStartResponse

@@ -1,7 +1,11 @@
 import HomeLayout from "@/layouts/HomeLayout";
 import LobbyCard from "@/components/LobbyCard";
-import { type WSLobby } from "../../../backend/src/types/ws.types";
-import useWebSocket from "@/hooks/useWebSocket";
+import {
+  LobbyCreateRequest,
+  type WSLobby,
+} from "../../../backend/src/types/ws.types";
+import WsProvider, { useWsContext } from "@/context/WsContext";
+import CreateLobbyButton from "@/components/CreateLobbyButton";
 
 const lobbies: WSLobby[] = [
   {
@@ -25,11 +29,24 @@ const lobbies: WSLobby[] = [
 ];
 
 export default function Home() {
-  const { isOpen } = useWebSocket("http://localhost:8080");
+  const { sendWsMessage } = useWsContext();
+
+  const handleCreateLobby = (params: { name: string }) => {
+    const createMessage: LobbyCreateRequest = {
+      type: "lobby_create",
+      payload: {
+        user: "",
+        lobbyName: params.name,
+      },
+    };
+
+    sendWsMessage(createMessage);
+  };
 
   return (
     <div className="space-y-8">
       <h1 className="text-3xl font-bold">Lobbies</h1>
+      <CreateLobbyButton onSubmit={handleCreateLobby} />
 
       <section className="space-y-2">
         {lobbies.map((lobby) => (
@@ -41,5 +58,9 @@ export default function Home() {
 }
 
 Home.getLayout = (page: React.ReactElement) => {
-  return <HomeLayout>{page}</HomeLayout>;
+  return (
+    <HomeLayout>
+      <WsProvider>{page}</WsProvider>
+    </HomeLayout>
+  );
 };

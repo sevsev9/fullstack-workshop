@@ -4,7 +4,12 @@ import * as authService from "@/services/auth.service";
 import { toast } from "sonner";
 import type { User } from "../../../backend/src/model/user.model";
 import type { LoginProps, RegisterProps } from "@/services/auth.service";
-import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "@/utils/localstorage";
+import {
+  ACCESS_TOKEN_KEY,
+  REFRESH_TOKEN_KEY,
+  removeLocalStorageItem,
+  setLocalStorageItem,
+} from "@/utils/localstorage";
 
 type AuthContextType = {
   user?: User;
@@ -42,8 +47,8 @@ export default function AuthProvider({
       toast(result.message);
     } else {
       setUser(result.data.user);
-      localStorage.setItem(ACCESS_TOKEN_KEY, result.data.access_token);
-      localStorage.setItem(REFRESH_TOKEN_KEY, result.data.refresh_token);
+      setLocalStorageItem(ACCESS_TOKEN_KEY, result.data.access_token);
+      setLocalStorageItem(REFRESH_TOKEN_KEY, result.data.refresh_token);
     }
   };
 
@@ -53,8 +58,9 @@ export default function AuthProvider({
       toast(result.message);
     } else {
       setUser(undefined);
-      localStorage.removeItem(ACCESS_TOKEN_KEY);
-      localStorage.removeItem(REFRESH_TOKEN_KEY);
+
+      removeLocalStorageItem(ACCESS_TOKEN_KEY);
+      removeLocalStorageItem(REFRESH_TOKEN_KEY);
     }
   };
 

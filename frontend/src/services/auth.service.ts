@@ -6,6 +6,10 @@ export type LoginProps = {
   password: string;
 };
 
+export type RefreshTokenProps = {
+  refreshToken?: string;
+};
+
 export type RegisterProps = LoginProps & {
   username: string;
 };
@@ -26,6 +30,13 @@ export const login = async (credentials: LoginProps) => {
 export const register = async (props: RegisterProps) => {
   return await apiPost<RegisterProps, void>({
     endpoint: "/auth/register",
+    body: props,
+  });
+};
+
+export const refreshToken = async (props: RefreshTokenProps) => {
+  return await apiPost<RefreshTokenProps, void>({
+    endpoint: "/auth/refresh",
     body: props,
   });
 };
