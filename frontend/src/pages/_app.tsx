@@ -1,7 +1,6 @@
 import { Toaster } from "@/components/ui/sonner";
 import AuthProvider from "@/context/AuthContext";
 import { AppPropsWithLayout } from "@/types/next";
-
 import "@/styles/globals.css";
 
 export default function App({ Component, pageProps }: AppPropsWithLayout) {
