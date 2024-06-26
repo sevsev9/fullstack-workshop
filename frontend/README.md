@@ -8,8 +8,9 @@
 check `package.json` for all used dependencies
 
 
-### Running the application
+## Running the application
 
+### Development
 ```bash
 npm run dev
 # or
@@ -21,6 +22,11 @@ bun dev
 ```
 
 
+### With docker
+
+```bash
+docker compose up -d
+```
 
 ### Env variables
 ```bash
