@@ -61,15 +61,15 @@ export async function reIssueAccessToken(refreshToken: string): Promise<{ error:
     }
 
     try {
-        const session = await Session.findById(decoded.sessionId);
+        const session = await Session.findById(decoded.session_id);
         if (!session || !session.valid) {
-            logger.warn(`{Session Service} - Session ${decoded.sessionId} invalid or not found`);
+            logger.warn(`{Session Service} - Session ${decoded.session_id} invalid or not found`);
             return { jwt: false, error: "Invalid session" };
         }
 
         const user = await findUserById(session.user_id);
         if (!user) {
-            logger.warn(`{Session Service} - User ${session.user_id} not found for session ${decoded.sessionId}`);
+            logger.warn(`{Session Service} - User ${session.user_id} not found for session ${decoded.session_id}`);
             return { jwt: false, error: "User not found" };
         }
 
