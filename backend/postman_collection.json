@@ -92,11 +92,11 @@
 									"if (pm.response.code === 200) {",
 									"    pm.collectionVariables.set(\"access_token\", response_body.access_token);",
 									"    pm.collectionVariables.set(\"refresh_token\", response_body.refresh_token);",
+									"    pm.collectionVariables.set(\"user_id\", response_body.user._id);",
 									"    console.log(\"Set tokens in collection.\");",
 									"}"
 								],
-								"type": "text/javascript",
-								"packages": {}
+								"type": "text/javascript"
 							}
 						}
 					],
@@ -263,6 +263,20 @@
 			"item": [
 				{
 					"name": "user profile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {   ",
+									"    pm.collectionVariables.set(\"user_id\", pm.response.json()._id);",
+									"    console.log(\"Set tokens in collection.\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -290,71 +304,7 @@
 							]
 						}
 					},
-					"response": [
-						{
-							"name": "profile-request-example",
-							"originalRequest": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "http://localhost:8080/api/user/profile",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8080",
-									"path": [
-										"api",
-										"user",
-										"profile"
-									]
-								}
-							},
-							"status": "OK",
-							"code": 200,
-							"_postman_previewlanguage": "json",
-							"header": [
-								{
-									"key": "X-Powered-By",
-									"value": "Express"
-								},
-								{
-									"key": "Vary",
-									"value": "Origin"
-								},
-								{
-									"key": "Access-Control-Allow-Credentials",
-									"value": "true"
-								},
-								{
-									"key": "Content-Type",
-									"value": "application/json; charset=utf-8"
-								},
-								{
-									"key": "Content-Length",
-									"value": "132"
-								},
-								{
-									"key": "ETag",
-									"value": "W/\"84-oR+a88yYApxzxe+wYjFXvcrUvbs\""
-								},
-								{
-									"key": "Date",
-									"value": "Wed, 22 May 2024 13:21:33 GMT"
-								},
-								{
-									"key": "Connection",
-									"value": "keep-alive"
-								},
-								{
-									"key": "Keep-Alive",
-									"value": "timeout=5"
-								}
-							],
-							"cookie": [],
-							"body": "{\n  \"email\": \"example@email.com\",\n    \"username\": \"sevsev9\",\n    \"role\": \"user\",\n    \"id\": \"someobjectid\"\n}"
-						}
-					]
+					"response": []
 				},
 				{
 					"name": "update user profile",
@@ -444,6 +394,139 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "todo",
+			"item": [
+				{
+					"name": "Get All Todos for User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/todo",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"todo"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add new todo",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let future_date = pm.variables.replaceIn(\"{{$randomDateFuture}}\");",
+									"",
+									"future_date = new Date(future_date).toISOString();",
+									"",
+									"pm.variables.set(\"randomFutureTimestamp\", future_date);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const res = pm.response.json();",
+									"",
+									"    pm.collectionVariables.set(\"todo_id\", res._id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"{{$randomBs}}\",\n    \"dueDate\": \"{{randomFutureTimestamp}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/todo",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"todo"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Todo",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"completed\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/todo/{{todo_id}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"todo",
+								"{{todo_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete a todo",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/todo/{{todo_id}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"todo",
+								"{{todo_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"auth": {
@@ -502,6 +585,14 @@
 		},
 		{
 			"key": "entry_id",
+			"value": ""
+		},
+		{
+			"key": "todo_id",
+			"value": ""
+		},
+		{
+			"key": "user_id",
 			"value": ""
 		}
 	]
