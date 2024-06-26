@@ -1,15 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import * as userService from "@/services/user.service";
-import * as authService from "@/services/auth.service";
-import { toast } from "sonner";
 import type { User } from "../../../backend/src/model/user.model";
-import type { LoginProps, RegisterProps } from "@/services/auth.service";
-import {
-  ACCESS_TOKEN_KEY,
-  REFRESH_TOKEN_KEY,
-  removeLocalStorageItem,
-  setLocalStorageItem,
-} from "@/utils/localstorage";
 import { useRouter } from "next/router";
 import { LOGIN_PAGE } from "@/utils/pages";
 
@@ -47,17 +38,6 @@ export default function AuthProvider({
   const me = async () => {
     const result = await userService.getProfile();
     return result.success ? result.data : undefined;
-  };
-
-  const login = async (credentials: LoginProps) => {
-    const result = await authService.login(credentials);
-    if (!result.success) {
-      toast(result.message);
-    } else {
-      setUser(result.data.user);
-      setLocalStorageItem(ACCESS_TOKEN_KEY, result.data.access_token);
-      setLocalStorageItem(REFRESH_TOKEN_KEY, result.data.refresh_token);
-    }
   };
 
   // can only be called if there is already a user in state
