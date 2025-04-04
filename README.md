@@ -32,4 +32,4 @@ This repository contains the the resources for the S24 workshop at the HTL-Wels
 
 
 
-![htl overview](./htl-overview-s24.png)
+![request flow](./request-flow.png)
