@@ -1,5 +1,3 @@
-Certainly! Here’s a quick explanation of JSON Web Tokens (JWTs) tailored for someone familiar with Java:
-
 ### What is JWT?
 
 JSON Web Token (JWT) is an open standard (RFC 7519) that defines a compact and self-contained way for securely transmitting information between parties as a JSON object. This information can be verified and trusted because it is digitally signed.

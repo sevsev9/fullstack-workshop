@@ -28,8 +28,12 @@ This repository contains the the resources for the S24 workshop at the HTL-Wels
         - npm init
         - install packages
         - create folders
-        - download files 
+        - download files
 
+## TODOs & Improvements
 
+- [ ] Create Prerequisites & Setup Guide => Saves an hour of installing prerequisites
+- [ ] Description of prior knowledge
+- [ ] Rough overview of what the course looks like
 
 ![request flow](./request-flow.png)

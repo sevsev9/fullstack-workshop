@@ -1,5 +1,3 @@
-Certainly! Here's a quick explanation of Express.js for someone familiar with Java:
-
 ### What is Express.js?
 
 Express.js is a minimalist web framework for Node.js that is designed to build web applications and APIs. It simplifies the process of handling HTTP requests and responses, making it easier to set up routes, manage middleware, and integrate with databases.
@@ -188,5 +186,8 @@ app.post('/json', (req, res) => {
    ```bash
    node index.js
    ```
+
+
+## Summary
 
 Express.js provides a straightforward and flexible way to build web applications and APIs with Node.js, making it an excellent choice for developers familiar with Java who want to leverage JavaScript's non-blocking I/O and asynchronous capabilities.
