@@ -1,4 +1,4 @@
-# SuperTicTacToe Backend
+# Backend
 
 ## Backend Project Setup
 

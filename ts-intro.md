@@ -28,7 +28,7 @@ let name: string = "John";
 
 ```java
 // Java
-public type Person {
+public class Person {
     String getName();
     int getAge();
 }
