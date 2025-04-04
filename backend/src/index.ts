@@ -4,7 +4,7 @@ import fs from "fs/promises";
 import { Server } from "ws";
 
 import logger from "./util/logger.util";
-import { checkEnv } from "./util/env.util";
+import env from "./util/env.util";
 import cors from "./util/cors.util";
 import connect from "./util/mongodb.util";
 import { deserializeUser } from "./middleware/deserializeUser";
@@ -13,22 +13,19 @@ import { connectionHandler } from "./ws/handlers";
 
 (async () => {
     try {
-        checkEnv();
-        logger.info("Successfully validated environment.");
-
         // attempt to read public key files
         try {
             logger.info(
                 `Attempting to read key files. PRIV="${process.env.PRIVATE_KEY_FILE}", PUB="${process.env.PUBLIC_KEY_FILE}"`,
             );
-
+ 
             // read keys from files
             const private_key = await fs.readFile(
-                process.env.PRIVATE_KEY_FILE,
+                env.PRIVATE_KEY_FILE,
                 "utf-8",
             );
             const public_key = await fs.readFile(
-                process.env.PUBLIC_KEY_FILE,
+                env.PUBLIC_KEY_FILE,
                 "utf-8",
             );
 
@@ -48,7 +45,7 @@ import { connectionHandler } from "./ws/handlers";
 
         // Connect to the database
         logger.info("Attempting to connect to configured mongodb...");
-        await connect(process.env.DB_URL);
+        await connect(env.DB_URL);
         logger.info("Successfully connected to mongodb!");
 
         const app = express();
@@ -65,7 +62,7 @@ import { connectionHandler } from "./ws/handlers";
 
         const server = app.listen(process.env.PORT, () => {
             logger.info(
-                `Super-TicTacToe API running on port ${process.env.PORT}`,
+                `Backend API running on port ${process.env.PORT}`,
             );
         });
 

@@ -1,6 +1,6 @@
 import logger from "pino";
 import dayjs from "dayjs";
-import { checkEnv } from "./env.util";
+import env from "./env.util";
 
 
 export default logger({
@@ -11,5 +11,5 @@ export default logger({
         pid: false
     },
     timestamp: () => `,"time":"${dayjs().format()}"`,
-    level: checkEnv().LOG_LEVEL
+    level: env.LOG_LEVEL
 });

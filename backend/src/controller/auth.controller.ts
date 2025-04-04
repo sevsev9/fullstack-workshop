@@ -172,4 +172,4 @@ export async function logoutHandler(
         logger.error(`{Auth Controller} - Error invalidating session(s) for user ${res.locals.user._id}: `, e);
         return res.status(500).send(e);
     }
-}   
+}

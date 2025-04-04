@@ -1,18 +1,13 @@
-import { ZodError, infer, object, string } from "zod";
+import { coerce, object, string } from "zod";
+import { config } from "dotenv";
 
-const envVariables = object({
-    PORT: string().default("8080").transform(e => {
-        // check if the port is a int
-        try {
-            let p = parseInt(e);
+// Load environment variables from .env file
+config();
 
-            return p.toString();
-        } catch (e) {
-            console.warn("Error parsing given port, using default 8080");
-        }
-
-        return "8080";
-    }),
+const envSchema = object({
+    PORT: coerce.number({
+        message: "PORT must be a number."
+    }).default(3000),
     DB_URL: string({
         required_error: "DB_URL is required."
     }),
@@ -35,25 +30,4 @@ const envVariables = object({
     LOG_LEVEL: string().default("info").refine(e => ["trace", "debug", "info", "warn", "error", "fatal"].includes(e), "LOG_LEVEL must be one of trace, debug, info, warn, error, fatal"),
 });
 
-export function checkEnv() {
-    require("dotenv").config();
-
-    try {
-        // reassign process.env to the parsed env variables
-        Object.assign(process.env, envVariables.parse(process.env));
-    } catch (e) {
-        if (e instanceof ZodError) {
-            console.error(e.errors);
-        }
-
-        process.exit(1);
-    }
-
-    return process.env;
-}
-
-declare global {
-    namespace NodeJS {
-        interface ProcessEnv extends infer<typeof envVariables> { }
-    }
-}
+export default envSchema.parse(process.env);
